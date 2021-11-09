@@ -2,22 +2,33 @@
 #Preliminaries
 #####
 
-##Load libraries
+#Load libraries
 library(rjags)
 library(R2jags)
 library(openxlsx)
 
-##My local working directories
-setwd("C:/Users/u0133977/Dropbox/HypoMirror/Honish_pCO2/code/")
+#Read proxy data
+d = read.xlsx("data/211109_proxies.xlsx", sheet = "all data product")
 
-##Read proxy data
-d = read.xlsx("../210923_proxies.xlsx", sheet = "wSite")
-
-##Set up ages vector
+#Set up ages vector
 ages = seq(70, 0, by = -0.1)
 ages.len = length(ages)
-ages.s = (70 - d$age_Ma) *10
-ages.sSD = d$age_uncert*10
+
+#Parse data - co2 mean and uncertainty
+pco2 = log(d$CO2_ppm)
+##Max and min in log deviations
+pco2.mm = log(d$CO2_ppm + d$CO2_uncertainty_pos_ppm/2) - pco2
+pco2.mm = cbind(pco2.mm, pco2 - log(d$CO2_ppm - d$CO2_uncertainty__neg_ppm/2))
+##Average 1sd in log units
+pco2.sd = apply(pco2.mm, 1, mean)
+
+#Parse data - ages and uncertainty
+pco2.age = d$age_Ma
+pco2.age.sd = apply(d[,c("Age_uncertainty_pos_Ma", "Age_uncertainty_neg_Ma")], 1, mean)
+pco2.age.loc = d$Locality
+
+#ages.s = (70 - d$age_Ma) * 10
+#ages.sSD = d$age_uncert*10
 #ages = unique(ages)
 #ages = sort(ages, decreasing = TRUE)
 #age.ind = match(d$age_Ma, ages)
