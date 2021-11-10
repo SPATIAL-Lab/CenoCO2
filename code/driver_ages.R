@@ -58,7 +58,7 @@ dat = list(pco2.age = pco2.age, pco2.age.pre = pco2.age.pre, al = ages.len,
 parameters = c("pco2_m", "pco2_m.pre", "pco2_m.eps.ac")
 
 ##Run it
-n.iter = 21000
+n.iter = 11000
 n.burnin = 1000
 n.thin = 5
 pt = proc.time()
@@ -73,26 +73,35 @@ proc.time() - pt
 R2jags::traceplot(p, varname = c("pco2_m", "pco2_m.pre", "pco2_m.eps.ac"))
 View(p$BUGSoutput$summary)
 
+save(p, file = "out/post.rda")
+
 sl = p$BUGSoutput$sims.list
 su = p$BUGSoutput$summary
 sims = nrow(sl$pco2_m)
 
-png("../jpi_simple.png", width = 8, height = 6, units = "in", res = 600)
+plot(density(sl$pco2_m.eps.ac), xlim = c(0, 0.25), col = "red")
+lines(density(runif(1e6, 0.05, 0.95)))
+
+plot(density(sl$pco2_m.pre), col = "red")
+lines(density(rgamma(1e6, shape = 1, rate = 0.01)))
+
+png("out/jpi_simple.png", width = 8, height = 6, units = "in", res = 600)
 plot(-10, 0, xlab="Age (Ma)", ylab ="pCO2", xlim=c(0,68), ylim=c(100,4000))
 for(i in seq(1, sims, by = max(floor(sims / 500),1))){
   lines(ages, exp(sl$pco2_m[i,]), col = rgb(0,0,0, 0.02))
 }
 
-arrows(d$age_Ma, exp(d$ln_CO2mean+d$ln_2sig), d$age_Ma, exp(d$ln_CO2mean-d$ln_2sig), 
+arrows(pco2.age, exp(pco2 + 2 * pco2.sd), 
+       pco2.age, exp(pco2 - 2 * pco2.sd), 
        length = 0, angle = 90, code = 3, col = "light blue")
-arrows(d$age_Ma - d$age_uncert, exp(d$ln_CO2mean), d$age_Ma + d$age_uncert, 
-       exp(d$ln_CO2mean), length = 0, angle = 90, code = 3, col = "light blue")
+arrows(pco2.age - pco2.age.sd, exp(pco2), pco2.age + pco2.age.sd, 
+       exp(pco2), length = 0, angle = 90, code = 3, col = "light blue")
 
 lines(ages, exp(su[1:ages.len + 1, 5]), col="red", lw=2)
 lines(ages, exp(su[1:ages.len + 1, 3]), col="red", lty=3, lw=2)
 lines(ages, exp(su[1:ages.len + 1, 7]), col="red", lty=3, lw=2)
 
-points(d$age_Ma, exp(d$ln_CO2mean), pch=21, bg="white", cex=0.5)
+points(pco2.age, exp(pco2), pch=21, bg="white", cex=0.5)
 
 dev.off()
 
