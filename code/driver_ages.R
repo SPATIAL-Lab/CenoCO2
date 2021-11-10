@@ -21,11 +21,28 @@ pco2.mm = log(d$CO2_ppm + d$CO2_uncertainty_pos_ppm/2) - pco2
 pco2.mm = cbind(pco2.mm, pco2 - log(d$CO2_ppm - d$CO2_uncertainty__neg_ppm/2))
 ##Average 1sd in log units
 pco2.sd = apply(pco2.mm, 1, mean)
+pco2.pre = 1 / pco2.sd^2
 
 #Parse data - ages and uncertainty
 pco2.age = d$age_Ma
-pco2.age.sd = apply(d[,c("Age_uncertainty_pos_Ma", "Age_uncertainty_neg_Ma")], 1, mean)
-pco2.age.loc = d$Locality
+pco2.age.sd = apply(cbind(d$Age_uncertainty_pos_Ma, d$Age_uncertainty_neg_Ma), 1, mean)
+pco2.loc = d$Locality
+
+#Creat covariance matrix for ages
+pco2.vcov = matrix(nrow = length(pco2), ncol = length(pco2))
+diag(pco2.vcov) = pco2.age.sd^2
+for(i in 1:(length(pco2)-1)){
+  for(j in (i+1):length(pco2)){
+    if(pco2.loc[i] == pco2.loc[j]){
+      pco2.vcov[i, j] = pco2.vcov[j, i] = 
+        0.90 * pco2.age.sd[i] * pco2.age.sd[j] 
+    } else{
+      pco2.vcov[i, j] = pco2.vcov[j, i] = 0
+    }
+  }
+}
+
+pco2.age.pre = solve(pco2.vcov)
 
 #ages.s = (70 - d$age_Ma) * 10
 #ages.sSD = d$age_uncert*10
@@ -34,28 +51,26 @@ pco2.age.loc = d$Locality
 #age.ind = match(d$age_Ma, ages)
 
 ##Data to pass to BUGS model
-dat = list(pco2.age = ages.s, pco2.age.pre = 1 / ages.sSD^2, al = ages.len,
-           pco2 = d$ln_CO2mean, pco2.pre = 1 / (d$ln_2sig/2)^2)
+dat = list(pco2.age = pco2.age, pco2.age.pre = pco2.age.pre, al = ages.len,
+           pco2 = pco2, pco2.pre = pco2.pre)
 
 ##Parameters to save
 parameters = c("pco2_m", "pco2_m.pre", "pco2_m.eps.ac")
 
 ##Run it
-n.iter = 51000
+n.iter = 21000
 n.burnin = 1000
 n.thin = 5
 pt = proc.time()
-#p = jags(model.file = "parametric_model_ages.R", parameters.to.save = parameters, 
+#p = jags(model.file = "code/parametric_model_ages.R", parameters.to.save = parameters, 
 #         data = dat, inits = NULL, n.chains=3, n.iter = n.iter, 
 #         n.burnin = n.burnin, n.thin = n.thin)
-p = do.call(jags.parallel, list(model.file = "parametric_model_ages.R", parameters.to.save = parameters, 
+p = do.call(jags.parallel, list(model.file = "code/parametric_model_ages.R", parameters.to.save = parameters, 
                                       data = dat, inits = NULL, n.chains=3, n.iter = n.iter, 
                                       n.burnin = n.burnin, n.thin = n.thin) )
 proc.time() - pt
 
-R2jags::traceplot(p, varname = c("pco2_m"[5], "pco2_m[105]", "pco2_m[305]", "pco2_m[505]", "pco2_m[605]", 
-                                 "pco2_m[705]", "pco2_m[905]", "pco2_m[1105]", "pco2_m[1205]", "pco2_m.pre", 
-                                 "pco2_m.eps.ac"))
+R2jags::traceplot(p, varname = c("pco2_m", "pco2_m.pre", "pco2_m.eps.ac"))
 View(p$BUGSoutput$summary)
 
 sl = p$BUGSoutput$sims.list

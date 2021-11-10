@@ -3,13 +3,16 @@ model {
   #Data model for pCO2 observations
   
   for(i in 1:length(pco2)){
-    pco2[i] ~ dnorm(pco2_m[round(pco2.ai[i])], pco2.pre[i])
-    
-    pco2.ai[i] ~ dnorm(pco2.age[i], pco2.age.pre[i]) T (1, 700.99)
+    pco2[i] ~ dnorm(pco2_m[pco2.aii[i]], pco2.pre[i])
   }
   
-  #Process model
+  #Age model
+  for(i in 1:length(pco2)){
+    pco2.aii[i] = max(min(round((70 - pco2.ai[i]) * 10), al), 1)
+  }
+  pco2.ai ~ dmnorm(pco2.age, pco2.age.pre)
   
+  #Process model
   for(i in 2:al){
     pco2_m[i] = pco2_m[i-1] + pco2_m.eps[i]
     
