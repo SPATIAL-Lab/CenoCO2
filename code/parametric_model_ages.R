@@ -8,7 +8,7 @@ model {
   
   #Age model
   for(i in 1:length(pco2)){
-    pco2.aii[i] = max(min(round((70 - pco2.ai[i]) * 10), al), 1)
+    pco2.aii[i] = max(min(round((70 - pco2.ai[i]) * 1 / ages.bin), al), 1)
   }
   pco2.ai ~ dmnorm(pco2.age, pco2.age.pre)
   
