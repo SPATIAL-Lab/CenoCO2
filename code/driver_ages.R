@@ -11,7 +11,8 @@ library(openxlsx)
 d = read.xlsx("data/211109_proxies.xlsx", sheet = "all data product")
 
 #Set up ages vector
-ages = seq(70, 0, by = -0.1)
+ages.bin = 0.5
+ages = seq(70, 0, by = 0 - ages.bin)
 ages.len = length(ages)
 
 #Parse data - co2 mean and uncertainty
@@ -52,7 +53,7 @@ pco2.age.pre = solve(pco2.vcov)
 
 ##Data to pass to BUGS model
 dat = list(pco2.age = pco2.age, pco2.age.pre = pco2.age.pre, al = ages.len,
-           pco2 = pco2, pco2.pre = pco2.pre)
+           pco2 = pco2, pco2.pre = pco2.pre, ages.bin = ages.bin)
 
 ##Parameters to save
 parameters = c("pco2_m", "pco2_m.pre", "pco2_m.eps.ac")
