@@ -24,7 +24,7 @@ model {
 
   #Priors on model parameters  
   
-  pco2_m.eps.ac ~ dunif(0.05, 0.9999)
+  pco2_m.eps.ac ~ dunif(0.5, 0.9999)
   
   pco2_m.pre ~ dgamma(pco2_m.pre.shp, pco2_m.pre.rate)
   pco2_m.pre.shp = 1

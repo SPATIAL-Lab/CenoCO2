@@ -8,7 +8,7 @@ library(R2jags)
 library(openxlsx)
 
 #Read proxy data
-d = read.xlsx("data/211109_proxies.xlsx", sheet = "all data product")
+d = read.xlsx("data/211129_proxies.xlsx", sheet = "all data product")
 
 #Set up ages vector
 ages.bin = 0.5
@@ -59,15 +59,15 @@ dat = list(pco2.age = pco2.age, pco2.age.pre = pco2.age.pre, al = ages.len,
 parameters = c("pco2_m", "pco2_m.pre", "pco2_m.eps.ac")
 
 ##Run it
-n.iter = 21000
-n.burnin = 1000
+n.iter = 202000
+n.burnin = 2000
 n.thin = trunc((n.iter - n.burnin) / 2500)
 pt = proc.time()
 #p = jags(model.file = "code/parametric_model_ages.R", parameters.to.save = parameters, 
 #         data = dat, inits = NULL, n.chains=3, n.iter = n.iter, 
 #         n.burnin = n.burnin, n.thin = n.thin)
 p = do.call(jags.parallel, list(model.file = "code/parametric_model_ages.R", parameters.to.save = parameters, 
-                                      data = dat, inits = NULL, n.chains=3, n.iter = n.iter, 
+                                      data = dat, inits = NULL, n.chains=6, n.iter = n.iter, 
                                       n.burnin = n.burnin, n.thin = n.thin) )
 proc.time() - pt
 
@@ -83,7 +83,7 @@ sl = p$BUGSoutput$sims.list
 su = p$BUGSoutput$summary
 sims = nrow(sl$pco2_m)
 
-plot(density(sl$pco2_m.eps.ac), xlim = c(0, 0.25), col = "red")
+plot(density(sl$pco2_m.eps.ac), xlim = c(0.5, 1), col = "red")
 lines(density(runif(1e6, 0.05, 0.95)))
 
 plot(density(sl$pco2_m.pre), col = "red")
