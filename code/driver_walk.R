@@ -77,7 +77,7 @@ pt = proc.time()
 #         data = dat, inits = NULL, n.chains=3, n.iter = n.iter, 
 #         n.burnin = n.burnin, n.thin = n.thin)
 p = do.call(jags.parallel, list(model.file = "code/parametric_model_walk.R", parameters.to.save = parameters, 
-                                      data = dat, inits = NULL, n.chains=3, n.iter = n.iter, 
+                                      data = dat, inits = NULL, n.chains=4, n.iter = n.iter, 
                                       n.burnin = n.burnin, n.thin = n.thin) )
 proc.time() - pt
 
@@ -87,7 +87,7 @@ dev.off()
 
 View(p$BUGSoutput$summary)
 
-save(p, file = "out/post.rda")
+save(p, file = "out/postAlk.rda")
 
 sl = p$BUGSoutput$sims.list
 su = p$BUGSoutput$summary
@@ -125,7 +125,7 @@ points(pco2.age[d$group == 2], exp(pco2[d$group == 2]), pch=21,
 dev.off()
 
 pout = data.frame("Age" = ages, "Mean" = exp(su[1:ages.len + 1, 5]), "ptile_2.5" = exp(su[1:ages.len + 1, 3]), "ptile_97.5" = exp(su[1:ages.len + 1, 7]))
-write.csv(pout, "out/pCO2_JPI.csv", row.names = FALSE)
+write.csv(pout, "out/pCO2_JPIwALK.csv", row.names = FALSE)
 
 #Make space
 mod.p = double()

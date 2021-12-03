@@ -13,6 +13,7 @@ d = read.xlsx("data/211129_proxies.xlsx", sheet = "all data product")
 #Set up ages vector
 ages.bin = 0.5
 ages = seq(70, 0, by = 0 - ages.bin)
+ages = ages - ages.bin / 2
 ages.len = length(ages)
 
 #Parse data - co2 mean and uncertainty
@@ -84,13 +85,14 @@ su = p$BUGSoutput$summary
 sims = nrow(sl$pco2_m)
 
 plot(density(sl$pco2_m.eps.ac), xlim = c(0.5, 1), col = "red")
-lines(density(runif(1e6, 0.05, 0.95)))
+lines(density(runif(1e6, 0.5, 0.95)))
 
 plot(density(sl$pco2_m.pre), col = "red")
 lines(density(rgamma(1e6, shape = 1, rate = 0.01)))
 
 png("out/jpi_simple.png", width = 8, height = 6, units = "in", res = 600)
-plot(-10, 0, xlab="Age (Ma)", ylab ="pCO2", xlim=c(0,65), ylim=c(100,3000))
+plot(-10, 0, xlab="Age (Ma)", ylab = expression("pCO"[2]), 
+     xlim=c(65,0), ylim=c(100,3000))
 for(i in seq(1, sims, by = max(floor(sims / 500),1))){
   lines(ages, exp(sl$pco2_m[i,]), col = rgb(0,0,0, 0.02))
 }
@@ -124,6 +126,6 @@ for(j in 1:length(ages)){
 mod.pp = pmin(mod.p, 1 - mod.p) * 2
 
 png("out/modprog.png", width = 8, height = 6, units = "in", res = 600)
-plot(ages, mod.pp, type = "l", ylab = "p(408.5)", xlab = "Age (Ma)", ylim=c(0, 0.2), xlim=c(0,30))
+plot(ages, mod.pp, type = "l", ylab = "p(408.5)", xlab = "Age (Ma)", ylim=c(0, 0.2), xlim=c(30,0))
 abline(0.05, 0, col = "red", lty = 3)
 dev.off()
