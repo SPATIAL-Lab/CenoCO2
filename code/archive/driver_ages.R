@@ -8,23 +8,7 @@ library(R2jags)
 library(openxlsx)
 
 #Read proxy data
-df = "data/211129_proxies.xlsx"
-d = read.xlsx(df, sheet = "all data product")
-d.alk = read.xlsx(df, sheet = "phytoplankton product")
-
-#Data subsets incl alk methods
-d = d[,c("CO2_ppm", "CO2_uncertainty_pos_ppm", "CO2_uncertainty__neg_ppm",
-           "age_Ma", "Age_uncertainty_pos_Ma", "Age_uncertainty_neg_Ma",
-           "Locality")]
-d$group = rep(3)
-d.3 = d.alk[,c(12, 13, 14, 3, 4, 5, 23)]
-d.3 = cbind(d.3, rep(1))
-names(d.3) = names(d)
-d.4 = d.alk[,c(15, 16, 17, 3, 4, 5, 23)]
-d.4 = cbind(d.4, rep(2))
-names(d.4) = names(d)
-d = rbind(d, d.3, d.4)
-d = d[!is.na(d$CO2_uncertainty_pos_ppm),]
+d = read.xlsx("data/211129_proxies.xlsx", sheet = "all data product")
 
 #Set up ages vector
 ages.bin = 0.5
@@ -45,7 +29,7 @@ pco2.age = d$age_Ma
 pco2.age.sd = apply(cbind(d$Age_uncertainty_pos_Ma, d$Age_uncertainty_neg_Ma), 1, mean)
 pco2.loc = d$Locality
 
-#Create covariance matrix for ages
+#Creat covariance matrix for ages
 pco2.vcov = matrix(nrow = length(pco2), ncol = length(pco2))
 diag(pco2.vcov) = pco2.age.sd^2
 for(i in 1:(length(pco2)-1)){
@@ -58,26 +42,32 @@ for(i in 1:(length(pco2)-1)){
     }
   }
 }
+
 pco2.age.pre = solve(pco2.vcov)
 
+#ages.s = (70 - d$age_Ma) * 10
+#ages.sSD = d$age_uncert*10
+#ages = unique(ages)
+#ages = sort(ages, decreasing = TRUE)
+#age.ind = match(d$age_Ma, ages)
+
 ##Data to pass to BUGS model
-dat = list(pco2.age = pco2.age, pco2.age.pre = pco2.age.pre, 
-           pco2 = pco2, pco2.pre = pco2.pre, group = d$group,
-           al = ages.len, ages.bin = ages.bin)
+dat = list(pco2.age = pco2.age, pco2.age.pre = pco2.age.pre, al = ages.len,
+           pco2 = pco2, pco2.pre = pco2.pre, ages.bin = ages.bin)
 
 ##Parameters to save
-parameters = c("pco2_m", "pco2_m.pre", "pco2_m.eps.ac", "alkmeth")
+parameters = c("pco2_m", "pco2_m.pre", "pco2_m.eps.ac")
 
 ##Run it
-n.iter = 26000
-n.burnin = 1000
+n.iter = 202000
+n.burnin = 2000
 n.thin = trunc((n.iter - n.burnin) / 2500)
 pt = proc.time()
-#p = jags(model.file = "code/parametric_model_walk.R", parameters.to.save = parameters, 
+#p = jags(model.file = "code/parametric_model_ages.R", parameters.to.save = parameters, 
 #         data = dat, inits = NULL, n.chains=3, n.iter = n.iter, 
 #         n.burnin = n.burnin, n.thin = n.thin)
-p = do.call(jags.parallel, list(model.file = "code/parametric_model_walk.R", parameters.to.save = parameters, 
-                                      data = dat, inits = NULL, n.chains=4, n.iter = n.iter, 
+p = do.call(jags.parallel, list(model.file = "code/parametric_model_ages.R", parameters.to.save = parameters, 
+                                      data = dat, inits = NULL, n.chains=6, n.iter = n.iter, 
                                       n.burnin = n.burnin, n.thin = n.thin) )
 proc.time() - pt
 
@@ -87,20 +77,21 @@ dev.off()
 
 View(p$BUGSoutput$summary)
 
-save(p, file = "out/postAlk.rda")
+save(p, file = "out/post.rda")
 
 sl = p$BUGSoutput$sims.list
 su = p$BUGSoutput$summary
 sims = nrow(sl$pco2_m)
 
 plot(density(sl$pco2_m.eps.ac), xlim = c(0.5, 1), col = "red")
-lines(density(runif(1e6, 0.05, 0.95)))
+lines(density(runif(1e6, 0.5, 0.95)))
 
 plot(density(sl$pco2_m.pre), col = "red")
 lines(density(rgamma(1e6, shape = 1, rate = 0.01)))
 
 png("out/jpi_simple.png", width = 8, height = 6, units = "in", res = 600)
-plot(-10, 0, xlab="Age (Ma)", ylab ="pCO2", xlim=c(65,0), ylim=c(100,3000))
+plot(-10, 0, xlab="Age (Ma)", ylab = expression("pCO"[2]), 
+     xlim=c(65,0), ylim=c(100,3000))
 for(i in seq(1, sims, by = max(floor(sims / 500),1))){
   lines(ages, exp(sl$pco2_m[i,]), col = rgb(0,0,0, 0.02))
 }
@@ -115,17 +106,12 @@ lines(ages, exp(su[1:ages.len + 1, 5]), col="red", lw=2)
 lines(ages, exp(su[1:ages.len + 1, 3]), col="red", lty=3, lw=2)
 lines(ages, exp(su[1:ages.len + 1, 7]), col="red", lty=3, lw=2)
 
-points(pco2.age[d$group == 3], exp(pco2[d$group == 3]), 
-       pch=21, bg="white", cex=0.5)
-points(pco2.age[d$group == 1], exp(pco2[d$group == 1]), pch=21, 
-       bg="black", cex=0.5)
-points(pco2.age[d$group == 2], exp(pco2[d$group == 2]), pch=21, 
-       bg="gray", cex=0.5)
+points(pco2.age, exp(pco2), pch=21, bg="white", cex=0.5)
 
 dev.off()
 
 pout = data.frame("Age" = ages, "Mean" = exp(su[1:ages.len + 1, 5]), "ptile_2.5" = exp(su[1:ages.len + 1, 3]), "ptile_97.5" = exp(su[1:ages.len + 1, 7]))
-write.csv(pout, "out/pCO2_JPIwALK.csv", row.names = FALSE)
+write.csv(pout, "out/pCO2_JPI.csv", row.names = FALSE)
 
 #Make space
 mod.p = double()
@@ -139,6 +125,6 @@ for(j in 1:length(ages)){
 mod.pp = pmin(mod.p, 1 - mod.p) * 2
 
 png("out/modprog.png", width = 8, height = 6, units = "in", res = 600)
-plot(ages, mod.pp, type = "l", ylab = "p(408.5)", xlab = "Age (Ma)", ylim=c(0, 0.2), xlim=c(0,30))
+plot(ages, mod.pp, type = "l", ylab = "p(408.5)", xlab = "Age (Ma)", ylim=c(0, 0.2), xlim=c(30,0))
 abline(0.05, 0, col = "red", lty = 3)
 dev.off()
