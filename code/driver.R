@@ -15,9 +15,12 @@ d = read.xlsx(df, sheet = "all data product")
 d = d[,c("CO2_ppm", "CO2_uncertainty_pos_ppm", "CO2_uncertainty_neg_ppm",
            "age_Ma", "Age_uncertainty_pos_Ma", "Age_uncertainty_neg_Ma",
            "locality")]
+mod = data.frame(280, 5, 5, 0, 0.001, 0.001, "Keeling")
+names(mod) = names(d)
+d = rbind(d, mod)
 
 #Set up ages vector
-ages.bin = 0.1
+ages.bin = 0.5
 ages = seq(70, 0, by = 0 - ages.bin) - ages.bin / 2
 ages.len = length(ages)
 
@@ -56,7 +59,7 @@ dat = list(pco2.age = pco2.age, pco2.age.pre = pco2.age.pre,
            al = ages.len, ages.bin = ages.bin)
 
 ##Parameters to save
-parameters = c("pco2_m", "pco2_m.pre", "pco2_m.eps.ac", "alkmeth")
+parameters = c("pco2_m", "pco2_m.pre", "pco2_m.eps.ac")
 
 ##Run it
 n.iter = 30000
@@ -71,4 +74,4 @@ p = do.call(jags.parallel, list(model.file = "code/model.R", parameters.to.save 
                                       n.burnin = n.burnin, n.thin = n.thin) )
 proc.time() - pt
 
-save(p, file = "out/post200kryTest.rda")
+save(p, file = "out/post1MryHighAC.rda")
