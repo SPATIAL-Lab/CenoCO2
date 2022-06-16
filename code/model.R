@@ -8,7 +8,7 @@ model {
   
   #Age model
   for(i in 1:length(pco2)){
-    pco2.aii[i] = max(min(round((70 - pco2.ai[i]) * 1 / ages.bin), al), 1)
+    pco2.aii[i] = max(min(round((70 - pco2.ai[i]) / ages.bin), al), 1)
   }
   pco2.ai ~ dmnorm(pco2.age, pco2.age.pre)
   
@@ -24,7 +24,7 @@ model {
 
   #Priors on model parameters  
   
-  pco2_m.eps.ac ~ dunif(0.5, 0.9999)
+  pco2_m.eps.ac ~ dunif(0.01, 0.99)
   
   pco2_m.pre ~ dgamma(pco2_m.pre.shp, pco2_m.pre.rate)
   pco2_m.pre.shp = 1

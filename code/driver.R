@@ -62,7 +62,7 @@ dat = list(pco2.age = pco2.age, pco2.age.pre = pco2.age.pre,
 parameters = c("pco2_m", "pco2_m.pre", "pco2_m.eps.ac")
 
 ##Run it
-n.iter = 30000
+n.iter = 55000
 n.burnin = 5000
 n.thin = trunc((n.iter - n.burnin) / 2500)
 pt = proc.time()
