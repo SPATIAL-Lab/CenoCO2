@@ -6,31 +6,32 @@ su = p$BUGSoutput$summary
 sims = nrow(sl$pco2_m)
 
 #parameter posteriors
-plot(density(sl$pco2_m.eps.ac), xlim = c(0.5, 1), col = "red")
-lines(density(runif(1e6, 0.5, 0.95)))
+plot(density(sl$pco2_m.eps.ac), xlim = c(0.05, 1), col = "red")
+lines(density(runif(1e6, 0.05, 0.95)))
 
 plot(density(sl$pco2_m.pre), col = "red")
 lines(density(rgamma(1e6, shape = 1, rate = 0.01)))
 
 #timeseries plot
-png("out/jpi_simple.png", width = 8, height = 6, units = "in", res = 600)
-plot(-10, 0, xlab="Age (Ma)", ylab ="pCO2", xlim=c(65,0), ylim=c(100,3000))
-for(i in seq(1, sims, by = max(floor(sims / 500),1))){
-  lines(ages, exp(sl$pco2_m[i,]), col = rgb(0,0,0, 0.02))
-}
+pts = apply(sl$pco2_m[], 2, quantile, 
+            probs = c(0.025, 0.25, 0.5, 0.75, 0.975))
+pts = t(pts)
+
+#png("out/CenozoicCO2.png", width = 8, height = 6, units = "in", res = 600)
+cairo_ps("out/CenozoicCO2.eps", width = 8, height = 6,
+         fallback_resolution = 600)
+plot(-10, 0, xlab="Age (Ma)", ylab = expression("CO"[2]*" (ppmv)"), 
+     xlim=c(65,0), ylim=c(100,3000))
 
 arrows(pco2.age, exp(pco2 + 2 * pco2.sd), 
        pco2.age, exp(pco2 - 2 * pco2.sd), 
-       length = 0, angle = 90, code = 3, col = "light blue")
+       length = 0, angle = 90, code = 3, col = "light grey")
 arrows(pco2.age - pco2.age.sd, exp(pco2), pco2.age + pco2.age.sd, 
-       exp(pco2), length = 0, angle = 90, code = 3, col = "light blue")
+       exp(pco2), length = 0, angle = 90, code = 3, col = "light grey")
 
-lines(ages, exp(su[1:ages.len + 1, 5]), col="red", lw=2)
-lines(ages, exp(su[1:ages.len + 1, 3]), col="red", lty=3, lw=2)
-lines(ages, exp(su[1:ages.len + 1, 7]), col="red", lty=3, lw=2)
+points(pco2.age, exp(pco2), cex=0.5, col = "dark grey")
 
-points(pco2.age, exp(pco2), 
-       pch=21, bg="white", cex=0.5)
+tsdens(cbind(ages, exp(pts)), "blue")
 
 dev.off()
 

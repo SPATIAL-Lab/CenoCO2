@@ -6,7 +6,7 @@ tsdens = function(d, base = "black"){
   
   base.rgb = col2rgb(base)
   cols = c(rgb(base.rgb[1]/255, base.rgb[2]/255, base.rgb[3]/255, alpha = 0.25), 
-           rgb(base.rgb[1]/255, base.rgb[2]/255, base.rgb[3]/255, alpha = 0.5),
+           rgb(base.rgb[1]/255, base.rgb[2]/255, base.rgb[3]/255, alpha = 0.25),
            rgb(base.rgb[1]/255, base.rgb[2]/255, base.rgb[3]/255, alpha = 1))
   
   polygon(c(d[, 1], rev(d[, 1])), c(d[, 2], rev(d[, 6])), 
