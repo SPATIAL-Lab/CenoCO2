@@ -74,4 +74,4 @@ p = do.call(jags.parallel, list(model.file = "code/model.R", parameters.to.save 
                                       n.burnin = n.burnin, n.thin = n.thin) )
 proc.time() - pt
 
-save(p, file = "out/post1MryHighAC.rda")
+save(p, file = "out/postCeno.rda")
