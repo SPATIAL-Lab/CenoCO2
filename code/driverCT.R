@@ -20,10 +20,9 @@ mod = data.frame(280, 5, 5, 0, 0.001, 0.001, "Keeling")
 names(mod) = names(d)
 d = rbind(d, mod)
 
-#Set up ages vector
-ages.bin = 0.5
-ages = seq(70, 0, by = 0 - ages.bin) - ages.bin / 2
-ages.len = length(ages)
+#Set up fixed time point ages vector
+ts.bin = 0.5
+ts = seq(70, 0, by = 0 - ts.bin) - ts.bin / 2
 
 #Parse data - co2 mean and uncertainty
 pco2 = log(d$CO2_ppm)
@@ -55,17 +54,19 @@ for(i in 1:(length(pco2)-1)){
 pco2.age.pre = solve(pco2.vcov)
 
 ##Data to pass to BUGS model
-dat = list(pco2.age = pco2.age, pco2.age.pre = pco2.age.pre, 
-           pco2 = pco2, pco2.pre = pco2.pre,
-           al = ages.len, ages.bin = ages.bin)
+dat = list(pco2.age = pco2.age, pco2.age.pre = pco2.vcov, 
+           pco2 = pco2, pco2.pre = pco2.pre, ts = ts, ns = length(pco2.age),
+           nall = length(pco2.age) + length(ts))
 
 ##Parameters to save
-parameters = c("pco2_m", "pco2_m.pre", "pco2_m.eps.ac", "pco2.off", "pco2.ai")
+parameters = c("pco2_m", "pco2_m.pre", "pco2_m.eps.ac", "ages")
 
-inits = list(list(pco2.ai = rmvn(1, pco2.age, pco2.vcov)[1,]),
-             list(pco2.ai = rmvn(1, pco2.age, pco2.vcov)[1,]),
-             list(pco2.ai = rmvn(1, pco2.age, pco2.vcov)[1,]),
-             list(pco2.ai = rmvn(1, pco2.age, pco2.vcov)[1,]))
+inits = list(list(pco2.ai = rmvn(1, pco2.age, pco2.vcov)[1,]))
+             
+inits = list(list("pco2.ai" = rmvn(1, pco2.age, pco2.vcov)[1,]),
+             list("pco2.ai" = rmvn(1, pco2.age, pco2.vcov)[1,]),
+             list("pco2.ai" = rmvn(1, pco2.age, pco2.vcov)[1,]),
+             list("pco2.ai" = rmvn(1, pco2.age, pco2.vcov)[1,]))
 
 ##Run it
 n.iter = 10000
@@ -75,9 +76,9 @@ pt = proc.time()
 #p = jags(model.file = "code/parametric_model_walk.R", parameters.to.save = parameters, 
 #         data = dat, inits = NULL, n.chains=3, n.iter = n.iter, 
 #         n.burnin = n.burnin, n.thin = n.thin)
-p = do.call(jags, list(model.file = "code/model.R", parameters.to.save = parameters, 
+p = do.call(jags.parallel, list(model.file = "code/modelCT.R", parameters.to.save = parameters, 
                                       data = dat, inits = inits, n.chains = 4, n.iter = n.iter, 
                                       n.burnin = n.burnin, n.thin = n.thin) )
 proc.time() - pt
 
-save(p, file = "out/postCenoLE.rda")
+save(p, file = "out/postCenoCT.rda")
