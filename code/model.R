@@ -3,7 +3,8 @@ model {
   #Data model for pCO2 observations
   
   for(i in 1:length(pco2)){
-    pco2[i] ~ dnorm(pco2_m[pco2.aii[i]], pco2.pre[i])
+    pco2[i] ~ dnorm(pco2.off[i], pco2.pre[i])
+    pco2.off[i] ~ dnorm(pco2_m[pco2.aii[i]], pco2.off.pre)
   }
   
   #Age model
@@ -23,6 +24,7 @@ model {
   pco2_m[1] ~ dunif(6, 8)
 
   #Priors on model parameters  
+  pco2.off.pre ~ dgamma(2, 0.1)
   
   pco2_m.eps.ac ~ dunif(0.01, 0.99)
   
