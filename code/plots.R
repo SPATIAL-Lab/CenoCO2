@@ -1,5 +1,5 @@
 ##climate sense
-load("out/postCenoLE.rda")
+load("out/postCenoLERAM.rda")
 cp = p$BUGSoutput$sims.list$pco2_m
 cp = cp[,-(ncol(cp))]
 load("out/postTemp.rda")
@@ -28,7 +28,7 @@ png("out/CenozoicCO2.png", width = 8, height = 11, units = "in", res = 600)
 #         fallback_resolution = 600)
 layout(matrix(c(1, 2), nrow = 2), heights = c(lcm(5*2.54), lcm(6*2.54)))
 par(mai = c(0.1, 1.1, 0.1, 0.1))
-plot(-10, 0, ylab = expression("CO"[2]*" (ppmv)"), 
+plot(-10, 0, ylab = expression("CO"[2]*" (ppmv)"), xlab = "", 
      xlim=c(65,0), ylim=c(100,3000), axes = FALSE)
 
 arrows(pco2.age, exp(pco2 + 2 * pco2.sd), 
@@ -82,7 +82,7 @@ for(i in 1:ncol(cp.ex)){
   curve.p[i] = sum(ct) / nrow(cp.ex)
 }
 
-png("out/modprog.png", width = 9, height = 5, units = "in", 
+png("out/modprob.png", width = 9, height = 5, units = "in", 
     res = 600)
 par(mai = c(1.1, 1.1, 0.1, 0.8))
 plot(0, 0, xlim = c(16, 0), ylim = c(100, 600), type = "n",
