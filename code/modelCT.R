@@ -19,12 +19,18 @@ model {
   ##rank and sort
   a.r = rank(-ai)
   ages = -sort(-ai)
-  ##combine with fixed timepoints
+  ##combine with fixed time points
   ai = c(pco2.ai, ts)
   ##pick data ages
-  pco2.ai ~ dmnorm.vcov(pco2.age, pco2.age.pre)
+  for(i in 1:length(lp)){
+    a.off[i] ~ dnorm(0, lp[i])
+    for(j in lc[i,1]:lc[i,2]){
+      pco2.ai[j] = pco2.age[j] + a.off[i]
+    }
+  }
+  #pco2.ai ~ dmnorm(pco2.age, pco2.age.pre)
   
-  #Intial condition
+  #Initial condition
   pco2_m.eps[1] ~ dnorm(0, pco2_m.pre)
   pco2_m[1] ~ dunif(6, 8)
 

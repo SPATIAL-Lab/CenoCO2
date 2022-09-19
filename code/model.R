@@ -6,12 +6,17 @@ model {
     pco2[i] ~ dnorm(pco2.off[i], pco2.pre[i])
     pco2.off[i] ~ dnorm(pco2_m[pco2.aii[i]], pco2.off.pre)
   }
-  
+
   #Age model
   for(i in 1:length(pco2)){
     pco2.aii[i] = max(min(round((70 - pco2.ai[i]) / ages.bin), al), 1)
   }
-  pco2.ai ~ dmnorm(pco2.age, pco2.age.pre)
+  for(i in 1:length(lp)){
+    a.off[i] ~ dnorm(0, lp[i])
+    for(j in lc[i,1]:lc[i,2]){
+      pco2.ai[j] = pco2.age[j] + a.off[i]
+    }
+  }  
   
   #Process model
   for(i in 2:al){
