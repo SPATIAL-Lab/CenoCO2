@@ -6,7 +6,7 @@ load("out/postTemp.rda")
 tp = p$BUGSoutput$sims.list$t_m
 tp = tp[,-(ncol(tp))]
 ages = ages[-length(ages)]
-source("code/tsdens.R")
+source("code/helpers.R")
 library(openxlsx)
 
 #timeseries plot
@@ -107,6 +107,8 @@ mtext(expression("P(CO"[2]*" > 417.58)"), 4, line = 2,
       at = 0.05 ^ (1/3))
 dev.off()
 
+#ESS plot
+
 #only Cenozoic
 cp.c = cp[,-(1:8)]
 tp.c = tp[,-(1:8)]
@@ -116,11 +118,29 @@ ages.c = ages[-(1:8)]
 cps = (apply(cp.c, 2, quantile, probs = c(0.025, 0.5, 0.975)) - log(280)) / log(2)
 tps = (apply(tp.c, 2, quantile, probs = c(0.025, 0.5, 0.975)))
 
+#Ring dataset
+tring = data.frame("Age_min" = c(48, 42, 33.9, 27.8, 20.3, 14.7, 7.2, 3),
+                   "Age_max" = c(55, 46, 37.8, 33.9, 23.0, 17.0, 11.6, 3.3),
+                   "T_025" = c(10.5, 8.2, 7.7, 5.6, 5.4, 6.4, 4.5, 3),
+                   "T_5" = c(12.5, 10.5, 9.6, 7.5, 7.1, 8.2, 5.9, 3.9),
+                   "T_975" = c(14.5, 12.8, 11.5, 9.4, 8.8, 10, 7.3, 4.8))
+tring$Age_mean = apply(tring[,1:2], 1, mean)
+tring$Bin_min = pmax(pmin(round((66 - tring$Age_min) / ages.bin), length(ages.c)), 1)
+tring$Bin_max = pmax(pmin(round((66 - tring$Age_max) / ages.bin), length(ages.c)), 1)
+tring$Bin_mean = pmax(pmin(round((66 - tring$Age_mean) / ages.bin), length(ages.c)), 1)
+tring$C_975 = tring$C_5 = tring$C_025 = rep(0)
+
+for(i in 1:nrow(tring)){
+  tring[i, 10:12] = (quantile(cp.c[,tring$Bin_max[i]:tring$Bin_min[i]], 
+                             probs = c(0.025, 0.5, 0.975)) - log(280)) / log(2)
+}
+
 #colors
 cols = colorRampPalette(c("blue", "red"))
 cols = cols(6)
 epochs = c(0, 2.58, 5.33, 23, 33.9, 56)
 ci = findInterval(ages.c, epochs)
+tringi = findInterval(tring$Age_mean, epochs)
 
 #doublings vs T
 png("out/CimSens.png", width = 6, height = 7, units = "in", res = 600)
@@ -128,29 +148,41 @@ par(mai = c(2, 1, 0.2, 0.2))
 plot(cps[2,], tps[2,], xlim = range(cps), ylim = range(tps),
      xlab = expression("CO"[2]*" doublings"),
      ylab = expression(Delta*" GMST"))
-abline(0, 8, lty = 3)
-abline(0, 5, lty = 3)
+for(i in seq(-25, 15, by = 2)){
+  abline(i, 8, lty = 3, col = "grey")
+}
+for(i in seq(-25, 15, by = 2)){
+  abline(i, 5, lty = 2, col = "grey")
+}
 lines(cps[2,], tps[2,])
 arrows(cps[1,], tps[2,], cps[3,], tps[2,], length = 0, col = "dark grey")
 arrows(cps[2,], tps[1,], cps[2,], tps[3,], length = 0, col = "dark grey")
 points(cps[2,], tps[2,], pch = 21, bg = cols[ci], cex = 1.25)
-text(cps[2, 13], tps[2, 13], "60 Ma", pos = 1, offset = 0.7)
-text(cps[2, 33], tps[2, 33], "50 Ma", pos = 3, offset = 0.7)
-text(cps[2, 53], tps[2, 53] - 0.3, "40 Ma", pos = 4)
-text(cps[2, 73], tps[2, 73], "30 Ma", pos = 1, offset = 0.7)
-text(cps[2, 93], tps[2, 93], "20 Ma", pos = 3, offset = 1.2)
-text(cps[2, 113], tps[2, 113], "10 Ma", pos = 2, offset = 1.3)
-text(2.4, 11.4, "5 \u00B0C/doubling",
-     srt = (sin(5 / (diff(par("usr")[3:4]) / diff(par("usr")[1:2]))))/pi*180)
-text(0.8, 7, "8 \u00B0C/doubling", 
+
+lines(tring$C_5, tring$T_5, col = "darkolivegreen")
+arrows(tring$C_025, tring$T_5, tring$C_975, tring$T_5, length = 0, col = "darkgreen")
+arrows(tring$C_5, tring$T_025, tring$C_5, tring$T_975, length = 0, col = "darkgreen")
+points(tring$C_5, tring$T_5, pch = 22, bg = cols[tringi], cex = 2.5,
+       col = "darkgreen")
+
+#text(cps[2, 13], tps[2, 13], "60 Ma", pos = 1, offset = 0.7)
+#text(cps[2, 33], tps[2, 33], "50 Ma", pos = 3, offset = 0.7)
+#text(cps[2, 53], tps[2, 53] - 0.3, "40 Ma", pos = 4)
+#text(cps[2, 73], tps[2, 73], "30 Ma", pos = 1, offset = 0.7)
+#text(cps[2, 93], tps[2, 93], "20 Ma", pos = 3, offset = 1.2)
+#text(cps[2, 113], tps[2, 113], "10 Ma", pos = 2, offset = 1.3)
+text(1.52, -2, "5 \u00B0C/doubling", col = "dark grey",
+     srt = (sin(4.9 / (diff(par("usr")[3:4]) / diff(par("usr")[1:2]))))/pi*180)
+text(1, -1.8, "8 \u00B0C/doubling", col = "dark grey",
      srt = (sin(8 / (diff(par("usr")[3:4]) / diff(par("usr")[1:2]))))/pi*180)
 legend("bottomright", legend = c("Pleistocene", "Pliocene", 
                                  "Miocene", "Oligocene", 
                                  "Eocene", "Paleocene"),
-       pt.bg = cols, pch = 21, bty = "n")
+       pt.bg = cols, pch = 21, box.col = "white")
 axis(1, at = (log(c(250, 500, 1000, 1500)) - log(280)) / log(2), 
      labels = c("250", "500", "1000", "1500"), line = 5)
 mtext(expression("CO"[2]*" (ppmv)"), 1, line = 8)
+box()
 dev.off()
        
 #version for talks

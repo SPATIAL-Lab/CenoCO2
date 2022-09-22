@@ -15,3 +15,8 @@ tsdens = function(d, base = "black"){
           col = cols[2], border = NA)
   lines(d[, 1], d[, 4], col = cols[3], lwd = 2)
 }
+
+# Generates age vector
+agevec = function(start, ages.bin){
+  return(ages = seq(start, 0, by = 0 - ages.bin) - ages.bin / 2)
+}

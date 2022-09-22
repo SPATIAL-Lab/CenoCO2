@@ -7,6 +7,7 @@ library(rjags)
 library(R2jags)
 library(openxlsx)
 library(mvnfast)
+source("code/helpers.R")
 
 #Read proxy data
 df = "data/220602_proxies.xlsx"
@@ -22,7 +23,7 @@ d = rbind(d, mod)
 
 #Set up ages vector
 ages.bin = 0.5
-ages = seq(70, 0, by = 0 - ages.bin) - ages.bin / 2
+ages = agevec(70, ages.bin)
 ages.len = length(ages)
 
 #Parse data - co2 mean and uncertainty
