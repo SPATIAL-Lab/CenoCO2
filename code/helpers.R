@@ -30,8 +30,8 @@ prepit = function(){
   #Data subset 
   d = d[,c("CO2_ppm", "CO2_uncertainty_pos_ppm", "CO2_uncertainty_neg_ppm",
            "age_Ma", "Age_uncertainty_pos_Ma", "Age_uncertainty_neg_Ma",
-           "locality")]
-  mod = data.frame(280, 5, 5, 0, 0.001, 0.001, "Keeling")
+           "proxy", "locality")]
+  mod = data.frame(280, 5, 5, 0, 0.001, 0.001, "Instrumental", "Keeling")
   names(mod) = names(d)
   d = rbind(d, mod)
 
@@ -48,9 +48,10 @@ prepit = function(){
   pco2.age = d$age_Ma
   pco2.age.sd = apply(cbind(d$Age_uncertainty_pos_Ma, d$Age_uncertainty_neg_Ma), 1, mean)
   pco2.loc = d$locality
+  pco2.prox = d$proxy
   
   dat = data.frame(pco2, pco2.sd, pco2.pre, pco2.age, 
-                   pco2.age.sd, pco2.loc)
+                   pco2.age.sd, pco2.prox, pco2.loc)
   dat = dat[order(dat$pco2.loc),]
 
   return(dat)

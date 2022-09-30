@@ -63,17 +63,17 @@ axis(2)
 
 dev.off()
 
-#ESS plot
-#only Cenozoic
+# ESS plot
+# only Cenozoic
 cp.c = cp[,-(1:8)]
 tp.c = tp[,-(1:8)]
 ages.c = ages[-(1:8)]
 
-#stats
+# stats
 cps = (apply(cp.c, 2, quantile, probs = c(0.025, 0.5, 0.975)) - log(280)) / log(2)
 tps = (apply(tp.c, 2, quantile, probs = c(0.025, 0.5, 0.975)))
 
-#Ring dataset
+# Ring dataset
 tring = data.frame("Age_min" = c(48, 42, 33.9, 27.8, 20.3, 14.7, 7.2, 3),
                    "Age_max" = c(55, 46, 37.8, 33.9, 23.0, 17.0, 11.6, 3.3),
                    "T_025" = c(10.5, 8.2, 7.7, 5.6, 5.4, 6.4, 4.5, 3),
@@ -90,7 +90,7 @@ for(i in 1:nrow(tring)){
                               probs = c(0.025, 0.5, 0.975)) - log(280)) / log(2)
 }
 
-#colors
+# colors
 cols = rev(rgb(matrix(c(249, 169, 112, 252, 188, 134, 254, 219, 171,
                   255, 242, 0, 255, 249, 174, 254, 242, 227),
                   ncol = 3, byrow = TRUE), maxColorValue = 255))
@@ -98,7 +98,7 @@ epochs = c(0, 2.58, 5.33, 23, 33.9, 56)
 ci = findInterval(ages.c, epochs)
 tringi = findInterval(tring$Age_mean, epochs)
 
-#doublings vs T
+# doublings vs T
 png("out/CimSens.png", width = 6, height = 7, units = "in", res = 600)
 par(mai = c(2, 1, 0.2, 0.2))
 plot(cps[2,], tps[2,], xlim = range(cps), ylim = range(tps),
@@ -158,11 +158,11 @@ box()
 dev.off()
 
 
-#Change vs modern
-##Make space
+# Change vs modern
+## Make space
 mod.p = double()
 
-##Calculate the CDF and find quantile value of modern median in it
+## Calculate the CDF and find quantile value of modern median in it
 for(j in 1:length(ages)){
   cdf = ecdf(exp(cp[, j]))
   mod.p[j] = cdf(417.58)
@@ -170,7 +170,7 @@ for(j in 1:length(ages)){
 
 mod.pp = 1 - mod.p
 
-##Number of curves exceeding
+## Number of curves exceeding
 curve.p = double()
 cp.ex = exp(cp) > 417.58
 for(i in 1:ncol(cp.ex)){
@@ -208,7 +208,7 @@ mtext(expression("P(CO"[2]*" > 417.58)"), 4, line = 2,
 dev.off()
 
 
-#version for talks
+# version for talks
 png("out/CenozoicCO2_slide.png", width = 9, height = 6, units = "in", res = 600)
 
 par(mai = c(1.1, 1.1, 0.1, 0.9))
@@ -235,3 +235,51 @@ axis(4, seq(-5, 20, by=5), pos = -0.15)
 mtext("GMST (relative to preindustrial)", 4, line = 2, at = 7.5)
 
 dev.off()
+
+# Stats for data
+
+a1 = seq(0.5, 64.5, by = 0.1)
+nd1 = np1 = a1
+for(i in 1:length(a1)){
+  ds = dat[dat$pco2.age < a1[i] + 0.5 & dat$pco2.age >= a1[i] - 0.5,]
+  nd1[i] = nrow(ds)
+  np1[i] = length(unique(ds$pco2.prox))
+}
+
+a5 = seq(2.5, 64.5, by = 0.1)
+nd5 = np5 = a5
+for(i in 1:length(a5)){
+  ds = dat[dat$pco2.age < a5[i] + 2.5 & dat$pco2.age >= a5[i] - 2.5,]
+  nd5[i] = nrow(ds)
+  np5[i] = length(unique(ds$pco2.prox)) 
+}
+
+png("out/ts1.png", 9, 4.25, units = "in", res = 600)
+par(mar = c(5,5,1,1))
+plot(a1, log(nd1), xlim = c(67, 0), type = "l", axes = FALSE,
+     lwd = 3, xlab = "Age (Ma)", ylab = "# data per Myr",
+     col = rgb(237, 125, 49, maxColorValue = 255), cex.lab = 1.5)
+axis(1, cex.axis = 1.5)
+axis(2, at = log(c(1, 10, 100)), labels = c(1, 10, 100), 
+     cex.axis = 1.5)
+box()
+lines(a5, log(nd5/5), lwd = 3, lty = 3, 
+      col = rgb(237, 125, 49, maxColorValue = 255))
+legend(67, log(300), c("1 Myr bin", "5 Myr bin"), lty = c(1, 3), 
+       lwd = c(2,2), bty = "n", cex = 1.5,
+       col = rgb(237, 125, 49, maxColorValue = 255))
+dev.off()
+
+
+png("out/ts2.png", 9, 4.25, units = "in", res = 600)
+par(mar = c(5,5,1,1))
+plot(a1, np1, xlim = c(67, 0), type = "l", cex.axis = 1.5,
+     ylim = c(0, 5), lwd = 3, xlab = "Age (Ma)", ylab = "# proxies",
+     col = rgb(112, 173, 71, maxColorValue = 255), cex.lab = 1.5)
+lines(a5, np5, lwd = 3, lty = 3, 
+      col = rgb(112, 173, 71, maxColorValue = 255))
+legend(67, 5.4, c("1 Myr bin", "5 Myr bin"), lty = c(1, 3), 
+       lwd = c(2,2), bty = "n", cex = 1.5,
+       col = rgb(112, 173, 71, maxColorValue = 255))
+dev.off()
+
