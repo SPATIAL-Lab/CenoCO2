@@ -5,9 +5,17 @@ cp = cp[,-(ncol(cp))]
 load("out/postTemp.rda")
 tp = p$BUGSoutput$sims.list$t_m
 tp = tp[,-(ncol(tp))]
-ages = ages[-length(ages)]
 source("code/helpers.R")
 library(openxlsx)
+
+#prep data
+dat = prepit()
+
+#Set up ages vector
+ages.bin = 0.5
+ages = agevec(70, ages.bin)
+ages.len = length(ages)
+ages = ages[-length(ages)]
 
 #timeseries plot
 pts = apply(cp, 2, quantile, probs = c(0.025, 0.25, 0.5, 0.75, 0.975))
@@ -31,13 +39,14 @@ par(mai = c(0.1, 1.1, 0.1, 0.1))
 plot(-10, 0, ylab = expression("CO"[2]*" (ppmv)"), xlab = "", 
      xlim=c(65,0), ylim=c(100,3000), axes = FALSE)
 
-arrows(pco2.age, exp(pco2 + 2 * pco2.sd), 
-       pco2.age, exp(pco2 - 2 * pco2.sd), 
+arrows(dat$pco2.age, exp(dat$pco2 + 2 * dat$pco2.sd), 
+       dat$pco2.age, exp(dat$pco2 - 2 * dat$pco2.sd), 
        length = 0, angle = 90, code = 3, col = "light grey")
-arrows(pco2.age - pco2.age.sd, exp(pco2), pco2.age + pco2.age.sd, 
-       exp(pco2), length = 0, angle = 90, code = 3, col = "light grey")
+arrows(dat$pco2.age - dat$pco2.age.sd, exp(dat$pco2), 
+       dat$pco2.age + dat$pco2.age.sd, 
+       exp(dat$pco2), length = 0, angle = 90, code = 3, col = "light grey")
 
-points(pco2.age, exp(pco2), cex=0.5, col = "dark grey")
+points(dat$pco2.age, exp(dat$pco2), cex=0.5, col = "dark grey")
 
 tsdens(cbind(ages, exp(pts)), "dodgerblue4")
 axis(2)
@@ -54,9 +63,100 @@ axis(2)
 
 dev.off()
 
-#write output as CSV
-pout = data.frame("Age" = ages, "Mean" = exp(su[1:ages.len + 1, 5]), "ptile_2.5" = exp(su[1:ages.len + 1, 3]), "ptile_97.5" = exp(su[1:ages.len + 1, 7]))
-write.csv(pout, "out/pCO2_timeseries.csv", row.names = FALSE)
+#ESS plot
+#only Cenozoic
+cp.c = cp[,-(1:8)]
+tp.c = tp[,-(1:8)]
+ages.c = ages[-(1:8)]
+
+#stats
+cps = (apply(cp.c, 2, quantile, probs = c(0.025, 0.5, 0.975)) - log(280)) / log(2)
+tps = (apply(tp.c, 2, quantile, probs = c(0.025, 0.5, 0.975)))
+
+#Ring dataset
+tring = data.frame("Age_min" = c(48, 42, 33.9, 27.8, 20.3, 14.7, 7.2, 3),
+                   "Age_max" = c(55, 46, 37.8, 33.9, 23.0, 17.0, 11.6, 3.3),
+                   "T_025" = c(10.5, 8.2, 7.7, 5.6, 5.4, 6.4, 4.5, 3),
+                   "T_5" = c(12.5, 10.5, 9.6, 7.5, 7.1, 8.2, 5.9, 3.9),
+                   "T_975" = c(14.5, 12.8, 11.5, 9.4, 8.8, 10, 7.3, 4.8))
+tring$Age_mean = apply(tring[,1:2], 1, mean)
+tring$Bin_min = pmax(pmin(round((66 - tring$Age_min) / ages.bin), length(ages.c)), 1)
+tring$Bin_max = pmax(pmin(round((66 - tring$Age_max) / ages.bin), length(ages.c)), 1)
+tring$Bin_mean = pmax(pmin(round((66 - tring$Age_mean) / ages.bin), length(ages.c)), 1)
+tring$C_975 = tring$C_5 = tring$C_025 = rep(0)
+
+for(i in 1:nrow(tring)){
+  tring[i, 10:12] = (quantile(cp.c[,tring$Bin_max[i]:tring$Bin_min[i]], 
+                              probs = c(0.025, 0.5, 0.975)) - log(280)) / log(2)
+}
+
+#colors
+cols = rev(rgb(matrix(c(249, 169, 112, 252, 188, 134, 254, 219, 171,
+                  255, 242, 0, 255, 249, 174, 254, 242, 227),
+                  ncol = 3, byrow = TRUE), maxColorValue = 255))
+epochs = c(0, 2.58, 5.33, 23, 33.9, 56)
+ci = findInterval(ages.c, epochs)
+tringi = findInterval(tring$Age_mean, epochs)
+
+#doublings vs T
+png("out/CimSens.png", width = 6, height = 7, units = "in", res = 600)
+par(mai = c(2, 1, 0.2, 0.2))
+plot(cps[2,], tps[2,], xlim = range(cps), ylim = range(tps),
+     xlab = expression("CO"[2]*" doublings"),
+     ylab = expression(Delta*" GMST (\u00B0 C)"))
+rect(par("usr")[1], par("usr")[3],
+     par("usr")[2], par("usr")[4],
+       col = "grey80")
+for(i in seq(-25, 15, by = 2)){
+  abline(i, 8, lty = 3, col = "grey60")
+}
+for(i in seq(-25, 15, by = 2)){
+  abline(i, 5, lty = 2, col = "grey60")
+}
+arrows(cps[1,], tps[2,], cps[3,], tps[2,], length = 0, 
+       lwd = 0.75, col = "white")
+arrows(cps[2,], tps[1,], cps[2,], tps[3,], length = 0, 
+       lwd = 0.75, col = "white")
+lines(cps[2,], tps[2,], lwd = 2, col = "white")
+points(cps[2,], tps[2,], pch = 21, bg = cols[ci], 
+       col = "grey90", cex = 1.25)
+
+arrows(tring$C_025, tring$T_5, tring$C_975, tring$T_5, length = 0,
+       lwd = 0.75)
+arrows(tring$C_5, tring$T_025, tring$C_5, tring$T_975, length = 0,
+       lwd = 0.75)
+lines(tring$C_5, tring$T_5, lwd = 2)
+points(tring$C_5, tring$T_5, pch = 22, bg = cols[tringi], cex = 2.5)
+
+text(tring$C_5, tring$T_5, round(tring$Age_mean), cex = 0.75)
+
+text(cps[2, 13], tps[2, 13] - 0.3, "60", pos = 2, 
+     col = "white")
+text(cps[2, 33], tps[2, 33], "50", pos = 3, offset = 0.7, 
+     col = "white")
+text(cps[2, 53], tps[2, 53] - 0.3, "40", pos = 4, offset = 1,
+     col = "white")
+text(cps[2, 73], tps[2, 73], "30", pos = 1, offset = 1, 
+     col = "white")
+text(cps[2, 93] + 0.1, tps[2, 93], "20", pos = 3, offset = 1.2, 
+     col = "white")
+text(cps[2, 113], tps[2, 113], "10", pos = 2, offset = 2.7, 
+     col = "white")
+
+text(1.52, -2, "5 \u00B0C/doubling", col = "grey40",
+     srt = (sin(4.9 / (diff(par("usr")[3:4]) / diff(par("usr")[1:2]))))/pi*180)
+text(1, -1.8, "8 \u00B0C/doubling", col = "grey40",
+     srt = (sin(8 / (diff(par("usr")[3:4]) / diff(par("usr")[1:2]))))/pi*180)
+legend("bottomright", legend = c("Pleistocene", "Pliocene", 
+                                 "Miocene", "Oligocene", 
+                                 "Eocene", "Paleocene"),
+       pt.bg = cols, pch = 21, bg = "grey80")
+axis(1, at = (log(c(250, 500, 1000, 1500)) - log(280)) / log(2), 
+     labels = c("250", "500", "1000", "1500"), line = 5)
+mtext(expression("CO"[2]*" (ppmv)"), 1, line = 8)
+box()
+dev.off()
+
 
 #Change vs modern
 ##Make space
@@ -107,84 +207,7 @@ mtext(expression("P(CO"[2]*" > 417.58)"), 4, line = 2,
       at = 0.05 ^ (1/3))
 dev.off()
 
-#ESS plot
 
-#only Cenozoic
-cp.c = cp[,-(1:8)]
-tp.c = tp[,-(1:8)]
-ages.c = ages[-(1:8)]
-
-#stats
-cps = (apply(cp.c, 2, quantile, probs = c(0.025, 0.5, 0.975)) - log(280)) / log(2)
-tps = (apply(tp.c, 2, quantile, probs = c(0.025, 0.5, 0.975)))
-
-#Ring dataset
-tring = data.frame("Age_min" = c(48, 42, 33.9, 27.8, 20.3, 14.7, 7.2, 3),
-                   "Age_max" = c(55, 46, 37.8, 33.9, 23.0, 17.0, 11.6, 3.3),
-                   "T_025" = c(10.5, 8.2, 7.7, 5.6, 5.4, 6.4, 4.5, 3),
-                   "T_5" = c(12.5, 10.5, 9.6, 7.5, 7.1, 8.2, 5.9, 3.9),
-                   "T_975" = c(14.5, 12.8, 11.5, 9.4, 8.8, 10, 7.3, 4.8))
-tring$Age_mean = apply(tring[,1:2], 1, mean)
-tring$Bin_min = pmax(pmin(round((66 - tring$Age_min) / ages.bin), length(ages.c)), 1)
-tring$Bin_max = pmax(pmin(round((66 - tring$Age_max) / ages.bin), length(ages.c)), 1)
-tring$Bin_mean = pmax(pmin(round((66 - tring$Age_mean) / ages.bin), length(ages.c)), 1)
-tring$C_975 = tring$C_5 = tring$C_025 = rep(0)
-
-for(i in 1:nrow(tring)){
-  tring[i, 10:12] = (quantile(cp.c[,tring$Bin_max[i]:tring$Bin_min[i]], 
-                             probs = c(0.025, 0.5, 0.975)) - log(280)) / log(2)
-}
-
-#colors
-cols = colorRampPalette(c("blue", "red"))
-cols = cols(6)
-epochs = c(0, 2.58, 5.33, 23, 33.9, 56)
-ci = findInterval(ages.c, epochs)
-tringi = findInterval(tring$Age_mean, epochs)
-
-#doublings vs T
-png("out/CimSens.png", width = 6, height = 7, units = "in", res = 600)
-par(mai = c(2, 1, 0.2, 0.2))
-plot(cps[2,], tps[2,], xlim = range(cps), ylim = range(tps),
-     xlab = expression("CO"[2]*" doublings"),
-     ylab = expression(Delta*" GMST"))
-for(i in seq(-25, 15, by = 2)){
-  abline(i, 8, lty = 3, col = "grey")
-}
-for(i in seq(-25, 15, by = 2)){
-  abline(i, 5, lty = 2, col = "grey")
-}
-lines(cps[2,], tps[2,])
-arrows(cps[1,], tps[2,], cps[3,], tps[2,], length = 0, col = "dark grey")
-arrows(cps[2,], tps[1,], cps[2,], tps[3,], length = 0, col = "dark grey")
-points(cps[2,], tps[2,], pch = 21, bg = cols[ci], cex = 1.25)
-
-lines(tring$C_5, tring$T_5, col = "darkolivegreen")
-arrows(tring$C_025, tring$T_5, tring$C_975, tring$T_5, length = 0, col = "darkgreen")
-arrows(tring$C_5, tring$T_025, tring$C_5, tring$T_975, length = 0, col = "darkgreen")
-points(tring$C_5, tring$T_5, pch = 22, bg = cols[tringi], cex = 2.5,
-       col = "darkgreen")
-
-#text(cps[2, 13], tps[2, 13], "60 Ma", pos = 1, offset = 0.7)
-#text(cps[2, 33], tps[2, 33], "50 Ma", pos = 3, offset = 0.7)
-#text(cps[2, 53], tps[2, 53] - 0.3, "40 Ma", pos = 4)
-#text(cps[2, 73], tps[2, 73], "30 Ma", pos = 1, offset = 0.7)
-#text(cps[2, 93], tps[2, 93], "20 Ma", pos = 3, offset = 1.2)
-#text(cps[2, 113], tps[2, 113], "10 Ma", pos = 2, offset = 1.3)
-text(1.52, -2, "5 \u00B0C/doubling", col = "dark grey",
-     srt = (sin(4.9 / (diff(par("usr")[3:4]) / diff(par("usr")[1:2]))))/pi*180)
-text(1, -1.8, "8 \u00B0C/doubling", col = "dark grey",
-     srt = (sin(8 / (diff(par("usr")[3:4]) / diff(par("usr")[1:2]))))/pi*180)
-legend("bottomright", legend = c("Pleistocene", "Pliocene", 
-                                 "Miocene", "Oligocene", 
-                                 "Eocene", "Paleocene"),
-       pt.bg = cols, pch = 21, box.col = "white")
-axis(1, at = (log(c(250, 500, 1000, 1500)) - log(280)) / log(2), 
-     labels = c("250", "500", "1000", "1500"), line = 5)
-mtext(expression("CO"[2]*" (ppmv)"), 1, line = 8)
-box()
-dev.off()
-       
 #version for talks
 png("out/CenozoicCO2_slide.png", width = 9, height = 6, units = "in", res = 600)
 
