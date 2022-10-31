@@ -36,49 +36,6 @@ tdat = read.xlsx("data/Westerhold.xlsx", sheet = "data")
 tdat = tdat[,c(1,3)]
 names(tdat) = c("age", "temp")
 
-rp = function(){
-  par(mai = c(0.1, 1.1, 1.1, 0.9))
-  plot(-10, 0, ylab = "", xlab="Age (Ma)",  
-       xlim=c(65,0), ylim=c(3,8.3), axes = FALSE)
-  
-  sc = rgb2hsv(col2rgb("dodgerblue2"))
-  points(dat$pco2.age, dat$pco2, cex=0.5, 
-         col = hsv(sc[1], sc[2]/3, sc[3]))
-  
-  tsdens(cbind(ages, pts), "dodgerblue4")
-  axis(2, c(log(100), log(250), log(500), log(1000), log(2000)),
-       c(100, 250, 500, 1000, 2000))
-  axis(3, seq(70, 0, by = -10))
-  mtext(expression("CO"[2]*" (ppmv)"), 2, line = 3, at = 6.2)
-  mtext("Age (Ma)", 3, line = 3)
-  
-  ptop = par("usr")[4]
-  enames = c("Qu", "Pl", "Miocene", "Oligocene", "Eocene", "Paleocene")
-  for(i in 1:(length(epochs))){
-    polygon(c(rep(c(epochs, 66)[i], 2), rep(c(epochs, 66)[i+1], 2)),
-            c(ptop, rep(ptop - 0.3, 2), ptop), col = cols[i])
-    text(mean(c(epochs, 66)[i:(i+1)]), ptop - 0.15, enames[i])
-  }
-  
-  par(new = TRUE)
-  sc = rgb2hsv(col2rgb("grey50"))
-  plot(tdat, xlim=c(65,0), ylim = c(-5, 40), axes = FALSE,
-       cex = 0.5, col = hsv(sc[1], sc[2]/10, 0.8),
-       xlab = "", ylab = "")
-  
-  tsdens(cbind(ages, tpts), "black")
-  axis(4, seq(-5, 20, by=5), pos = -0.15)
-  mtext("GMST (relative to preindustrial)", 4, line = 2, at = 7.5)
-  
-}
-
-png("out/CenozoicCO2.png", width = 9, height = 7, units = "in", res = 600)
-#cairo_ps("out/CenozoicCO2.eps", width = 8, height = 6,
-#         fallback_resolution = 600)
-rp()
-dev.off()
-
-# ESS plot
 # only Cenozoic
 cp.c = cp[,-(1:8)]
 tp.c = tp[,-(1:8)]
@@ -87,6 +44,10 @@ ages.c = ages[-(1:8)]
 # stats
 cps = (apply(cp.c, 2, quantile, probs = c(0.025, 0.5, 0.975)) - log(280)) / log(2)
 tps = (apply(tp.c, 2, quantile, probs = c(0.025, 0.5, 0.975)))
+
+# assign points to Epoch
+ci = findInterval(ages.c, epochs)
+tringi = findInterval(tring$Age_mean, epochs)
 
 # Ring dataset
 tring = data.frame("Age_min" = c(48, 42, 33.9, 27.8, 20.3, 14.7, 7.2, 3),
@@ -105,9 +66,60 @@ for(i in 1:nrow(tring)){
                               probs = c(0.025, 0.5, 0.975)) - log(280)) / log(2)
 }
 
-# assign points to Epoch
-ci = findInterval(ages.c, epochs)
-tringi = findInterval(tring$Age_mean, epochs)
+rp = function(){
+  par(mai = c(0.1, 1.1, 1.1, 0.9))
+  plot(-10, 0, ylab = "", xlab="Age (Ma)",  
+       xlim=c(70,0), ylim=c(3.5,8.3), axes = FALSE)
+  
+  sc = rgb2hsv(col2rgb("dodgerblue2"))
+  points(dat$pco2.age, dat$pco2, cex=0.5, 
+         col = hsv(sc[1], sc[2]/3, sc[3]))
+  
+  tsdens(cbind(ages, pts), "dodgerblue4")
+  axis(2, c(log(100), log(250), log(500), log(1000), log(2000)),
+       c(100, 250, 500, 1000, 2000))
+  axis(3, seq(70, 0, by = -10))
+  mtext(expression("CO"[2]*" (ppm)"), 2, line = 3, at = 6.2)
+  mtext("Age (Ma)", 3, line = 3)
+  
+  ptop = par("usr")[4]
+  enames = c("Qu", "Pl", "Miocene", "Oligocene", "Eocene", "Paleocene")
+  for(i in 1:(length(epochs))){
+    polygon(c(rep(c(epochs, 66)[i], 2), rep(c(epochs, 66)[i+1], 2)),
+            c(ptop, rep(ptop - 0.3, 2), ptop), col = cols[i])
+    text(mean(c(epochs, 66)[i:(i+1)]), ptop - 0.15, enames[i])
+  }
+  
+  par(new = TRUE)
+  sc = rgb2hsv(col2rgb("grey50"))
+  plot(tdat, xlim=c(70,0), ylim = c(-5, 34), axes = FALSE,
+       cex = 0.5, col = hsv(sc[1], sc[2]/10, 0.8),
+       xlab = "", ylab = "")
+  
+  tsdens(cbind(ages, tpts), "black")
+  axis(4, seq(-5, 20, by=5), pos = -0.15)
+  mtext("GMST (K, relative to preindustrial)", 4, line = 2, at = 7.5)
+  
+  rcol = col2rgb("grey40", TRUE)
+  rcol[4] = 80
+  for(i in 1:nrow(tring)){
+    lines(c(tring$Age_min[i], tring$Age_max[i]), rep(tring$T_5[i], 2), 
+          lw = 2, lend = 1)    
+    polygon(c(rep(tring$Age_min[i], 2), rep(tring$Age_max[i], 2)), 
+            c(tring$T_025[i], rep(tring$T_975[i], 2), tring$T_025[i]),
+            col = rgb(rcol[1], rcol[2], rcol[3], rcol[4], maxColorValue = 255), 
+            border = "grey60")
+  }
+  
+}
+
+png("out/CenozoicCO2.png", width = 9, height = 5.5, units = "in", res = 600)
+#cairo_ps("out/CenozoicCO2.eps", width = 8, height = 6,
+#         fallback_resolution = 600)
+rp()
+dev.off()
+
+# ESS plot
 
 # doublings vs T
 png("out/CimSens.png", width = 6, height = 7, units = "in", res = 600)
