@@ -1,4 +1,3 @@
-##climate sense
 load("out/postCenoLERAM.rda")
 cp = p$BUGSoutput$sims.list$pco2_m
 cp = cp[,-(ncol(cp))]
@@ -8,59 +7,75 @@ tp = tp[,-(ncol(tp))]
 source("code/helpers.R")
 library(openxlsx)
 
-#prep data
+# prep data
 dat = prepit()
 
-#Set up ages vector
+# Set up ages vector
 ages.bin = 0.5
 ages = agevec(70, ages.bin)
 ages.len = length(ages)
 ages = ages[-length(ages)]
 
-#timeseries plot
+# timescale and colors
+cols = rev(rgb(matrix(c(249, 169, 112, 252, 188, 134, 254, 219, 171,
+                        255, 242, 0, 255, 249, 174, 254, 242, 227),
+                      ncol = 3, byrow = TRUE), maxColorValue = 255))
+epochs = c(0, 2.58, 5.33, 23, 33.9, 56)
+
+# timeseries plot
 pts = apply(cp, 2, quantile, probs = c(0.025, 0.25, 0.5, 0.75, 0.975))
 pts = t(pts)
 
 tpts = apply(tp, 2, quantile, probs = c(0.025, 0.25, 0.5, 0.75, 0.975))
 tpts = t(tpts)
 
-#Temperature proxy data
+# Temperature proxy data
 tdat = read.xlsx("data/Westerhold.xlsx", sheet = "data")
 
-#Data subset 
+# Data subset 
 tdat = tdat[,c(1,3)]
 names(tdat) = c("age", "temp")
 
-png("out/CenozoicCO2.png", width = 8, height = 11, units = "in", res = 600)
+rp = function(){
+  par(mai = c(0.1, 1.1, 1.1, 0.9))
+  plot(-10, 0, ylab = "", xlab="Age (Ma)",  
+       xlim=c(65,0), ylim=c(3,8.3), axes = FALSE)
+  
+  sc = rgb2hsv(col2rgb("dodgerblue2"))
+  points(dat$pco2.age, dat$pco2, cex=0.5, 
+         col = hsv(sc[1], sc[2]/3, sc[3]))
+  
+  tsdens(cbind(ages, pts), "dodgerblue4")
+  axis(2, c(log(100), log(250), log(500), log(1000), log(2000)),
+       c(100, 250, 500, 1000, 2000))
+  axis(3, seq(70, 0, by = -10))
+  mtext(expression("CO"[2]*" (ppmv)"), 2, line = 3, at = 6.2)
+  mtext("Age (Ma)", 3, line = 3)
+  
+  ptop = par("usr")[4]
+  enames = c("Qu", "Pl", "Miocene", "Oligocene", "Eocene", "Paleocene")
+  for(i in 1:(length(epochs))){
+    polygon(c(rep(c(epochs, 66)[i], 2), rep(c(epochs, 66)[i+1], 2)),
+            c(ptop, rep(ptop - 0.3, 2), ptop), col = cols[i])
+    text(mean(c(epochs, 66)[i:(i+1)]), ptop - 0.15, enames[i])
+  }
+  
+  par(new = TRUE)
+  sc = rgb2hsv(col2rgb("grey50"))
+  plot(tdat, xlim=c(65,0), ylim = c(-5, 40), axes = FALSE,
+       cex = 0.5, col = hsv(sc[1], sc[2]/10, 0.8),
+       xlab = "", ylab = "")
+  
+  tsdens(cbind(ages, tpts), "black")
+  axis(4, seq(-5, 20, by=5), pos = -0.15)
+  mtext("GMST (relative to preindustrial)", 4, line = 2, at = 7.5)
+  
+}
+
+png("out/CenozoicCO2.png", width = 9, height = 7, units = "in", res = 600)
 #cairo_ps("out/CenozoicCO2.eps", width = 8, height = 6,
 #         fallback_resolution = 600)
-layout(matrix(c(1, 2), nrow = 2), heights = c(lcm(5*2.54), lcm(6*2.54)))
-par(mai = c(0.1, 1.1, 0.1, 0.1))
-plot(-10, 0, ylab = expression("CO"[2]*" (ppmv)"), xlab = "", 
-     xlim=c(65,0), ylim=c(100,3000), axes = FALSE)
-
-arrows(dat$pco2.age, exp(dat$pco2 + 2 * dat$pco2.sd), 
-       dat$pco2.age, exp(dat$pco2 - 2 * dat$pco2.sd), 
-       length = 0, angle = 90, code = 3, col = "light grey")
-arrows(dat$pco2.age - dat$pco2.age.sd, exp(dat$pco2), 
-       dat$pco2.age + dat$pco2.age.sd, 
-       exp(dat$pco2), length = 0, angle = 90, code = 3, col = "light grey")
-
-points(dat$pco2.age, exp(dat$pco2), cex=0.5, col = "dark grey")
-
-tsdens(cbind(ages, exp(pts)), "dodgerblue4")
-axis(2)
-
-par(mai = c(1.1, 1.1, 0.1, 0.1))
-plot(-10, 0, xlab="Age (Ma)", ylab = "GMST (relative to preindustrial)", 
-     xlim=c(65,0), ylim = range(tdat$temp), axes = FALSE)
-
-points(tdat, cex=0.5, col = "dark grey")
-
-tsdens(cbind(ages, tpts), "firebrick4")
-axis(1)
-axis(2)
-
+rp()
 dev.off()
 
 # ESS plot
@@ -90,11 +105,7 @@ for(i in 1:nrow(tring)){
                               probs = c(0.025, 0.5, 0.975)) - log(280)) / log(2)
 }
 
-# colors
-cols = rev(rgb(matrix(c(249, 169, 112, 252, 188, 134, 254, 219, 171,
-                  255, 242, 0, 255, 249, 174, 254, 242, 227),
-                  ncol = 3, byrow = TRUE), maxColorValue = 255))
-epochs = c(0, 2.58, 5.33, 23, 33.9, 56)
+# assign points to Epoch
 ci = findInterval(ages.c, epochs)
 tringi = findInterval(tring$Age_mean, epochs)
 
@@ -107,19 +118,19 @@ plot(cps[2,], tps[2,], xlim = range(cps), ylim = range(tps),
 rect(par("usr")[1], par("usr")[3],
      par("usr")[2], par("usr")[4],
        col = "grey80")
-for(i in seq(-25, 15, by = 2)){
-  abline(i, 8, lty = 3, col = "grey60")
+for(i in seq(-25, 15, by = 5)){
+  abline(i, 8, lty = 3, col = "white")
 }
-for(i in seq(-25, 15, by = 2)){
-  abline(i, 5, lty = 2, col = "grey60")
+for(i in seq(-25, 15, by = 5)){
+  abline(i, 5, lty = 2, col = "white")
 }
 arrows(cps[1,], tps[2,], cps[3,], tps[2,], length = 0, 
-       lwd = 0.75, col = "white")
+       lwd = 0.75, col = "grey40")
 arrows(cps[2,], tps[1,], cps[2,], tps[3,], length = 0, 
-       lwd = 0.75, col = "white")
-lines(cps[2,], tps[2,], lwd = 2, col = "white")
+       lwd = 0.75, col = "grey40")
+lines(cps[2,], tps[2,], lwd = 2, col = "grey40")
 points(cps[2,], tps[2,], pch = 21, bg = cols[ci], 
-       col = "grey90", cex = 1.25)
+       col = "grey40", cex = 1.25)
 
 arrows(tring$C_025, tring$T_5, tring$C_975, tring$T_5, length = 0,
        lwd = 0.75)
@@ -131,23 +142,23 @@ points(tring$C_5, tring$T_5, pch = 22, bg = cols[tringi], cex = 2.5)
 text(tring$C_5, tring$T_5, round(tring$Age_mean), cex = 0.75)
 
 text(cps[2, 13], tps[2, 13] - 0.3, "60", pos = 2, 
-     col = "white")
+     col = "grey40")
 text(cps[2, 33], tps[2, 33], "50", pos = 3, offset = 0.7, 
-     col = "white")
+     col = "grey40")
 text(cps[2, 53], tps[2, 53] - 0.3, "40", pos = 4, offset = 1,
-     col = "white")
+     col = "grey40")
 text(cps[2, 73], tps[2, 73], "30", pos = 1, offset = 1, 
-     col = "white")
+     col = "grey40")
 text(cps[2, 93] + 0.1, tps[2, 93], "20", pos = 3, offset = 1.2, 
-     col = "white")
+     col = "grey40")
 text(cps[2, 113], tps[2, 113], "10", pos = 2, offset = 2.7, 
-     col = "white")
+     col = "grey40")
 
-text(1.52, -2, "5 \u00B0C/doubling", col = "grey40",
-     srt = (sin(4.9 / (diff(par("usr")[3:4]) / diff(par("usr")[1:2]))))/pi*180)
-text(1, -1.8, "8 \u00B0C/doubling", col = "grey40",
+text(1.52, -2, "5 \u00B0C/doubling", col = "white",
+     srt = (sin(4.8 / (diff(par("usr")[3:4]) / diff(par("usr")[1:2]))))/pi*180)
+text(0.95, -1.8, "8 \u00B0C/doubling", col = "white",
      srt = (sin(8 / (diff(par("usr")[3:4]) / diff(par("usr")[1:2]))))/pi*180)
-legend("bottomright", legend = c("Pleistocene", "Pliocene", 
+legend("bottomright", legend = c("Quaternary", "Pliocene", 
                                  "Miocene", "Oligocene", 
                                  "Eocene", "Paleocene"),
        pt.bg = cols, pch = 21, bg = "grey80")
