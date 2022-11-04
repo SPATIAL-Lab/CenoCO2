@@ -1,9 +1,9 @@
-load("out/postCenoLERAM.rda")
-cp = p$BUGSoutput$sims.list$pco2_m
-cp = cp[,-(ncol(cp))]
 load("out/postTemp.rda")
 tp = p$BUGSoutput$sims.list$t_m
 tp = tp[,-(ncol(tp))]
+load("out/postCenoLERAM.rda")
+cp = p$BUGSoutput$sims.list$pco2_m
+cp = cp[,-(ncol(cp))]
 source("code/helpers.R")
 library(openxlsx)
 
@@ -45,10 +45,6 @@ ages.c = ages[-(1:8)]
 cps = (apply(cp.c, 2, quantile, probs = c(0.025, 0.5, 0.975)) - log(280)) / log(2)
 tps = (apply(tp.c, 2, quantile, probs = c(0.025, 0.5, 0.975)))
 
-# assign points to Epoch
-ci = findInterval(ages.c, epochs)
-tringi = findInterval(tring$Age_mean, epochs)
-
 # Ring dataset
 tring = data.frame("Age_min" = c(48, 42, 33.9, 27.8, 20.3, 14.7, 7.2, 3),
                    "Age_max" = c(55, 46, 37.8, 33.9, 23.0, 17.0, 11.6, 3.3),
@@ -65,6 +61,10 @@ for(i in 1:nrow(tring)){
   tring[i, 10:12] = (quantile(cp.c[,tring$Bin_max[i]:tring$Bin_min[i]], 
                               probs = c(0.025, 0.5, 0.975)) - log(280)) / log(2)
 }
+
+# assign points to Epoch
+ci = findInterval(ages.c, epochs)
+tringi = findInterval(tring$Age_mean, epochs)
 
 rp = function(){
   par(mai = c(0.1, 1.1, 1.1, 0.9))
@@ -186,16 +186,17 @@ dev.off()
 mod.p = double()
 
 ## Calculate the CDF and find quantile value of modern median in it
+modCO2 = 417.93
 for(j in 1:length(ages)){
   cdf = ecdf(exp(cp[, j]))
-  mod.p[j] = cdf(417.58)
+  mod.p[j] = cdf(modCO2)
 }
 
 mod.pp = 1 - mod.p
 
 ## Number of curves exceeding
 curve.p = double()
-cp.ex = exp(cp) > 417.58
+cp.ex = exp(cp) > modCO2
 for(i in 1:ncol(cp.ex)){
   if(ncol(cp.ex) - i > 0){
     ct = apply(cp.ex[, i:ncol(cp.ex)], 1, any)
@@ -205,12 +206,13 @@ for(i in 1:ncol(cp.ex)){
   curve.p[i] = sum(ct) / nrow(cp.ex)
 }
 
+
 png("out/modprob.png", width = 9, height = 5, units = "in", 
     res = 600)
 par(mai = c(1.1, 1.1, 0.1, 0.8))
 plot(0, 0, xlim = c(16, 0), ylim = c(100, 600), type = "n",
      axes = FALSE, xlab = "Age (Ma)", ylab = "")
-lines(c(30, 0), rep(417.58, 2), col = "red", lty = 2, lwd = 2)
+lines(c(30, 0), rep(modCO2, 2), col = "red", lty = 2, lwd = 2)
 for(i in 1:250){
   lines(ages, exp(cp[runif(1, 1, nrow(cp)),]), 
         col = rgb(0, 0, 0, 0.05), lwd=2)
@@ -226,8 +228,7 @@ plot(ages, curve.p ^ (1/3), type = "l", axes = FALSE, lwd = 2,
 lines(c(30, 0), rep(0.05 ^ (1/3), 2), col = "red", lty = 3, lwd = 2)
 axis(4, c(0.0001, 0.05, 0.5) ^ (1/3),
      c(expression("10"^{-4}), 0.05, 0.5), pos = 0)
-mtext(expression("P(CO"[2]*" > 417.58)"), 4, line = 2,
-      at = 0.05 ^ (1/3))
+mtext("P(Exceedance)", 4, line = 2, at = 0.05 ^ (1/3))
 dev.off()
 
 
@@ -306,3 +307,37 @@ legend(67, 5.4, c("1 Myr bin", "5 Myr bin"), lty = c(1, 3),
        col = rgb(112, 173, 71, maxColorValue = 255))
 dev.off()
 
+# Show age model uncertainty
+sl = p$BUGSoutput$sims.list
+sl$pco2_m = sl$pco2_m[, -ncol(sl$pco2_m)]
+# Problem point at 42.5 Ma
+le.ind = dat$pco2.age == 42.5
+
+png("out/ProblemPoint.png", width = 9, height = 6, units = "in", res = 600)
+par(mai = c(1.1, 1.1, 0.2, 1.1))
+plot(dat$pco2.age[le.ind], dat$pco2[le.ind], xlim = c(55, 25), ylim = c(5.5, 9.5),
+     pch = 21, bg = "dark gray", axes = FALSE, xlab = ("Age(Ma)"),
+     ylab = "")
+arrows((dat$pco2.age - dat$pco2.age.sd)[le.ind], dat$pco2[le.ind],
+       (dat$pco2.age + dat$pco2.age.sd)[le.ind], dat$pco2[le.ind], length = 0)
+arrows(dat$pco2.age[le.ind], (dat$pco2 - dat$pco2.sd)[le.ind],
+       dat$pco2.age[le.ind], (dat$pco2 + dat$pco2.sd)[le.ind], length = 0)
+points(dat$pco2.age[le.ind], dat$pco2[le.ind], pch = 21, bg = "dark gray", cex = 2)
+axis(1)
+axis(2, at = c(log(250), log(500), log(1000), log(2000)), labels = c(250, 500, 1000, 2000))
+mtext(expression("CO"[2]*" (ppm)"), 2, line = 3, at = 6.5)
+tsdens(cbind(ages, pts), "dodgerblue4")
+ri = sample(1:nrow(sl$pco2.ai), 500)
+for(i in 1:length(ri)){
+  points(sl$pco2.ai[ri[i], le.ind], 
+         sl$pco2.off[ri[i], le.ind],
+         col = rgb(1, 0, 0, 0.5))
+}
+par(new = TRUE)
+plot(density(rnorm(1e6, dat$pco2.age[le.ind], dat$pco2.age.sd[le.ind])),
+     ylim = c(-0.18, 0.14), xlim = c(55, 25), axes = FALSE, xlab = "",
+     ylab = "", main = "", zero.line = FALSE)
+lines(density(sl$pco2.ai[, le.ind]), col = "red")
+axis(4, at = c(0, 0.05, 0.1, 0.15))
+mtext("P(Age)", 4, line = 3, at = 0.06)
+dev.off()
