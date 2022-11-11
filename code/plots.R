@@ -327,6 +327,7 @@ axis(1)
 axis(2, at = c(log(250), log(500), log(1000), log(2000)), labels = c(250, 500, 1000, 2000))
 mtext(expression("CO"[2]*" (ppm)"), 2, line = 3, at = 6.5)
 tsdens(cbind(ages, pts), "dodgerblue4")
+set.seed(101)
 ri = sample(1:nrow(sl$pco2.ai), 500)
 for(i in 1:length(ri)){
   points(sl$pco2.ai[ri[i], le.ind], 
@@ -339,5 +340,6 @@ plot(density(rnorm(1e6, dat$pco2.age[le.ind], dat$pco2.age.sd[le.ind])),
      ylab = "", main = "", zero.line = FALSE)
 lines(density(sl$pco2.ai[, le.ind]), col = "red")
 axis(4, at = c(0, 0.05, 0.1, 0.15))
-mtext("P(Age)", 4, line = 3, at = 0.06)
+mtext("P(Age)", 4, line = 3, at = 0.075)
 dev.off()
+
