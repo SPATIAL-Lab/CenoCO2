@@ -113,9 +113,11 @@ rp = function(){
   
 }
 
-png("out/CenozoicCO2.png", width = 9, height = 5.5, units = "in", res = 600)
-#cairo_ps("out/CenozoicCO2.eps", width = 8, height = 6,
-#         fallback_resolution = 600)
+#png("out/CenozoicCO2.png", width = 9, height = 5.5, units = "in", res = 600)
+#setEPS()
+#postscript("out/CenozoicCO2.eps")
+cairo_ps("out/CenozoicCO2.eps", width = 8, height = 6,
+         fallback_resolution = 600)
 rp()
 dev.off()
 
