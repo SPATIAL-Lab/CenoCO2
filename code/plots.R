@@ -12,9 +12,13 @@ dat = prepit()
 
 # Set up ages vector
 ages.bin = 0.5
-ages = agevec(70, ages.bin)
+ages = agevec(68, ages.bin)
 ages.len = length(ages)
 ages = ages[-length(ages)]
+
+#trim posterior ts
+cp = cp[,-(1:4)]
+tp = tp[,-(1:4)]
 
 # timescale and colors
 cols = rev(rgb(matrix(c(249, 169, 112, 252, 188, 134, 254, 219, 171,
@@ -37,9 +41,9 @@ tdat = tdat[,c(1,3)]
 names(tdat) = c("age", "temp")
 
 # only Cenozoic
-cp.c = cp[,-(1:8)]
-tp.c = tp[,-(1:8)]
-ages.c = ages[-(1:8)]
+cp.c = cp[,-(1:4)]
+tp.c = tp[,-(1:4)]
+ages.c = ages[-(1:4)]
 
 # stats
 cps = (apply(cp.c, 2, quantile, probs = c(0.025, 0.5, 0.975)) - log(280)) / log(2)
