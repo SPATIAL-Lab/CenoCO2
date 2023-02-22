@@ -118,10 +118,10 @@ rp = function(){
 }
 
 #png("out/CenozoicCO2.png", width = 9, height = 5.5, units = "in", res = 600)
-#setEPS()
-#postscript("out/CenozoicCO2.eps")
-cairo_ps("out/CenozoicCO2.eps", width = 8, height = 6,
-         fallback_resolution = 600)
+setEPS()
+postscript("out/CenozoicCO2.eps")
+#cairo_ps("out/CenozoicCO2.eps", width = 8, height = 6,
+#         fallback_resolution = 600)
 rp()
 dev.off()
 
@@ -274,7 +274,117 @@ axis(4, c(0.0001, 0.05, 0.5) ^ (1/3),
 mtext("P(Exceedance)", 4, line = 2, at = 0.05 ^ (1/3))
 dev.off()
 
+# Supplementary figures showing different time bin choices
 
+# 1 Myr
+load("out/postCeno1Myr.rda")
+cp = p$BUGSoutput$sims.list$pco2_m
+cp = cp[,-(ncol(cp))]
+source("code/helpers.R")
+library(openxlsx)
+
+# prep data
+dat = prepit()
+
+# Set up ages vector
+ages.bin = 1
+ages = agevec(68, ages.bin)
+ages.len = length(ages)
+ages = ages[-length(ages)]
+
+#trim posterior ts
+cp = cp[,-(1:2)]
+
+# timeseries plot
+pts = apply(cp, 2, quantile, probs = c(0.025, 0.25, 0.5, 0.75, 0.975))
+pts = t(pts)
+
+# only Cenozoic
+cp.c = cp[,-(1:2)]
+ages.c = ages[-(1:2)]
+
+# stats
+cps = (apply(cp.c, 2, quantile, probs = c(0.025, 0.5, 0.975)) - log(280)) / log(2)
+
+png("out/CO21Myr.png", width = 9, height = 5.5, units = "in", res = 600)
+par(mai = c(0.1, 1.1, 1.1, 0.9))
+plot(-10, 0, ylab = "", xlab="Age (Ma)",  
+     xlim=c(65,0), ylim=c(3.5,8.3), axes = FALSE)
+
+sc = rgb2hsv(col2rgb("dodgerblue2"))
+points(dat$pco2.age, dat$pco2, cex=0.5, 
+       col = hsv(sc[1], sc[2]/3, sc[3]))
+
+tsdens(cbind(ages, pts), "dodgerblue4")
+axis(2, c(log(100), log(250), log(500), log(1000), log(2000)),
+     c(100, 250, 500, 1000, 2000))
+axis(3, seq(70, 0, by = -10))
+mtext(expression("CO"[2]*" (ppm)"), 2, line = 3, at = 6.2)
+mtext("Age (Ma)", 3, line = 3)
+
+ptop = par("usr")[4]
+enames = c("Qu", "Pl", "Miocene", "Oligocene", "Eocene", "Paleocene")
+for(i in 1:(length(epochs))){
+  polygon(c(rep(c(epochs, 66)[i], 2), rep(c(epochs, 66)[i+1], 2)),
+          c(ptop, rep(ptop - 0.3, 2), ptop), col = cols[i])
+  text(mean(c(epochs, 66)[i:(i+1)]), ptop - 0.15, enames[i])
+}
+dev.off()
+
+# 100 kyr
+load("out/postCeno100kyr.rda")
+cp = p$BUGSoutput$sims.list$pco2_m
+cp = cp[,-(ncol(cp))]
+source("code/helpers.R")
+library(openxlsx)
+
+# prep data
+dat = prepit()
+
+# Set up ages vector
+ages.bin = 0.1
+ages = agevec(68, ages.bin)
+ages.len = length(ages)
+ages = ages[-length(ages)]
+
+#trim posterior ts
+cp = cp[,-(1:20)]
+
+# timeseries plot
+pts = apply(cp, 2, quantile, probs = c(0.025, 0.25, 0.5, 0.75, 0.975))
+pts = t(pts)
+
+# only Cenozoic
+cp.c = cp[,-(1:20)]
+ages.c = ages[-(1:20)]
+
+# stats
+cps = (apply(cp.c, 2, quantile, probs = c(0.025, 0.5, 0.975)) - log(280)) / log(2)
+
+png("out/CO2100kyr.png", width = 9, height = 5.5, units = "in", res = 600)
+par(mai = c(0.1, 1.1, 1.1, 0.9))
+plot(-10, 0, ylab = "", xlab="Age (Ma)",  
+     xlim=c(65,0), ylim=c(3.5,8.3), axes = FALSE)
+
+sc = rgb2hsv(col2rgb("dodgerblue2"))
+points(dat$pco2.age, dat$pco2, cex=0.5, 
+       col = hsv(sc[1], sc[2]/3, sc[3]))
+
+tsdens(cbind(ages, pts), "dodgerblue4")
+axis(2, c(log(100), log(250), log(500), log(1000), log(2000)),
+     c(100, 250, 500, 1000, 2000))
+axis(3, seq(70, 0, by = -10))
+mtext(expression("CO"[2]*" (ppm)"), 2, line = 3, at = 6.2)
+mtext("Age (Ma)", 3, line = 3)
+
+ptop = par("usr")[4]
+enames = c("Qu", "Pl", "Miocene", "Oligocene", "Eocene", "Paleocene")
+for(i in 1:(length(epochs))){
+  polygon(c(rep(c(epochs, 66)[i], 2), rep(c(epochs, 66)[i+1], 2)),
+          c(ptop, rep(ptop - 0.3, 2), ptop), col = cols[i])
+  text(mean(c(epochs, 66)[i:(i+1)]), ptop - 0.15, enames[i])
+}
+dev.off()
 
 
 # version for talks
