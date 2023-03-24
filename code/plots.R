@@ -1,3 +1,4 @@
+# Read in datasets and load packages/code
 load("out/postTemp.rda")
 tp = p$BUGSoutput$sims.list$t_m
 tp = tp[,-(ncol(tp))]
@@ -7,7 +8,7 @@ cp = cp[,-(ncol(cp))]
 source("code/helpers.R")
 library(openxlsx)
 
-# prep data
+# Prep data
 dat = prepit()
 
 # Set up ages vector
@@ -16,38 +17,36 @@ ages = agevec(68, ages.bin)
 ages.len = length(ages)
 ages = ages[-length(ages)]
 
-#trim posterior ts
+# Trim posterior ts to get only 68 Ma to present
 cp = cp[,-(1:4)]
 tp = tp[,-(1:4)]
 
-# timescale and colors
-cols = rev(rgb(matrix(c(249, 169, 112, 252, 188, 134, 254, 219, 171,
-                        255, 242, 0, 255, 249, 174, 254, 242, 227),
-                      ncol = 3, byrow = TRUE), maxColorValue = 255))
-epochs = c(0, 2.58, 5.33, 23, 33.9, 56)
+# Trim to only Cenozoic
+cp.c = cp[,-(1:4)]
+tp.c = tp[,-(1:4)]
+ages.c = ages[-(1:4)]
 
-# timeseries plot
+# Stats for timeseries plot
 pts = apply(cp, 2, quantile, probs = c(0.025, 0.25, 0.5, 0.75, 0.975))
 pts = t(pts)
 
 tpts = apply(tp, 2, quantile, probs = c(0.025, 0.25, 0.5, 0.75, 0.975))
 tpts = t(tpts)
 
-# Temperature proxy data
-tdat = read.xlsx("data/Westerhold.xlsx", sheet = "data")
-
-# Data subset 
-tdat = tdat[,c(1,3)]
-names(tdat) = c("age", "temp")
-
-# only Cenozoic
-cp.c = cp[,-(1:4)]
-tp.c = tp[,-(1:4)]
-ages.c = ages[-(1:4)]
-
-# stats
+# Stats for Cenozoic
 cps = (apply(cp.c, 2, quantile, probs = c(0.025, 0.5, 0.975)) - log(280)) / log(2)
 tps = (apply(tp.c, 2, quantile, probs = c(0.025, 0.5, 0.975)))
+
+# Timescale and colors
+cols = rev(rgb(matrix(c(249, 169, 112, 252, 188, 134, 254, 219, 171,
+                        255, 242, 0, 255, 249, 174, 254, 242, 227),
+                      ncol = 3, byrow = TRUE), maxColorValue = 255))
+epochs = c(0, 2.58, 5.33, 23, 33.9, 56)
+
+# Marine temperature proxy data
+tdat = read.xlsx("data/Westerhold.xlsx", sheet = "data")
+tdat = tdat[,c(1,3)]
+names(tdat) = c("age", "temp")
 
 # Ring dataset
 tring = data.frame("Age_min" = c(48, 42, 33.9, 27.8, 20.3, 14.7, 7.2, 3),
@@ -66,10 +65,7 @@ for(i in 1:nrow(tring)){
                               probs = c(0.025, 0.5, 0.975)) - log(280)) / log(2)
 }
 
-# assign points to Epoch
-ci = findInterval(ages.c, epochs)
-tringi = findInterval(tring$Age_mean, epochs)
-
+# Plotting function
 rp = function(){
   par(mai = c(0.1, 1.1, 1.1, 0.9))
   plot(-10, 0, ylab = "", xlab="Age (Ma)",  
@@ -87,7 +83,7 @@ rp = function(){
   mtext("Age (Ma)", 3, line = 3)
   
   ptop = par("usr")[4]
-  enames = c("Qu", "Pl", "Miocene", "Oligocene", "Eocene", "Paleocene")
+  enames = c("Ple", "Pli", "Miocene", "Oligocene", "Eocene", "Paleocene")
   for(i in 1:(length(epochs))){
     polygon(c(rep(c(epochs, 66)[i], 2), rep(c(epochs, 66)[i+1], 2)),
             c(ptop, rep(ptop - 0.3, 2), ptop), col = cols[i])
@@ -125,9 +121,15 @@ postscript("out/CenozoicCO2.eps")
 rp()
 dev.off()
 
+
 # ESS plot
 
 # doublings vs T
+
+# Assign points to Epoch
+ci = findInterval(ages.c, epochs)
+tringi = findInterval(tring$Age_mean, epochs)
+
 png("out/CimSens.png", width = 6, height = 7, units = "in", res = 600)
 par(mai = c(2, 1, 0.2, 0.2))
 plot(cps[2,], tps[2,], xlim = range(cps), ylim = range(tps),
