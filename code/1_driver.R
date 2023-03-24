@@ -1,11 +1,11 @@
-#####
-#Preliminaries
-#####
+#Preliminaries ----
 
 #Load libraries
 library(R2jags)
 library(openxlsx)
 source("code/helpers.R")
+
+#500 kyr bins for main text ----
 
 #Set up ages vector
 ages.bin = 0.5
@@ -27,21 +27,6 @@ for(i in 1:length(locs)){
 }
 lc = cbind(lc1, lc2)
 
-#Create covariance matrix for ages
-#pco2.vcov = matrix(nrow = length(pco2), ncol = length(pco2))
-#diag(pco2.vcov) = pco2.age.sd^2
-#for(i in 1:(length(pco2)-1)){
-#  for(j in (i+1):length(pco2)){
-#    if(pco2.loc[i] == pco2.loc[j]){
-#      pco2.vcov[i, j] = pco2.vcov[j, i] = 
-#        0.90 * pco2.age.sd[i] * pco2.age.sd[j] 
-#    } else{
-#      pco2.vcov[i, j] = pco2.vcov[j, i] = 0
-#    }
-#  }
-#}
-#pco2.age.pre = solve(pco2.vcov)
-
 ##Data to pass to BUGS model
 dat = list(pco2.age = dat$pco2.age, lc = lc, lp = lp, 
            pco2 = dat$pco2, pco2.pre = dat$pco2.pre,
@@ -55,9 +40,6 @@ n.iter = 100000
 n.burnin = 20000
 n.thin = trunc((n.iter - n.burnin) / 2500)
 pt = proc.time()
-#p = jags(model.file = "code/parametric_model_walk.R", parameters.to.save = parameters, 
-#         data = dat, inits = NULL, n.chains=3, n.iter = n.iter, 
-#         n.burnin = n.burnin, n.thin = n.thin)
 p = do.call(jags.parallel, list(model.file = "code/model.R", parameters.to.save = parameters, 
                                       data = dat, inits = NULL, n.chains = 4, n.iter = n.iter, 
                                       n.burnin = n.burnin, n.thin = n.thin) )
@@ -65,7 +47,7 @@ proc.time() - pt
 
 save(p, file = "out/postCenoLERAM.rda")
 
-# 1 Myr bins for SI
+# 1 Myr bins for SI ----
 
 #Set up ages vector
 ages.bin = 1
@@ -108,7 +90,7 @@ proc.time() - pt
 
 save(p, file = "out/postCeno1Myr.rda")
 
-# 100 kyr bins for SI
+#100 kyr bins for SI ----
 
 #Set up ages vector
 ages.bin = 0.1
