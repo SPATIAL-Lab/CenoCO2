@@ -116,13 +116,13 @@ rp = function(){
 #png("out/CenozoicCO2.png", width = 9, height = 5.5, units = "in", res = 600)
 setEPS()
 postscript("out/CenozoicCO2.eps")
-#cairo_ps("out/CenozoicCO2.eps", width = 8, height = 6,
-#         fallback_resolution = 600)
 rp()
 dev.off()
 
 
 # ESS plot
+library(RColorBrewer)
+cols = brewer.pal(6, "YlOrRd")
 
 # doublings vs T
 
@@ -130,20 +130,22 @@ dev.off()
 ci = findInterval(ages.c, epochs)
 tringi = findInterval(tring$Age_mean, epochs)
 
-png("out/CimSens.png", width = 6, height = 7, units = "in", res = 600)
+png("out/Fig3.png", width = 6, height = 7, units = "in", res = 600)
 par(mai = c(2, 1, 0.2, 0.2))
 plot(cps[2,], tps[2,], xlim = range(cps), ylim = range(tps),
-     xlab = expression("CO"[2]*" doublings"),
-     ylab = expression(Delta*" GMST (\u00B0 C)"))
+     xlab = expression("CO"[2]*" doublings (relative to preindustrial)"),
+     ylab = expression(Delta*" GMST (K relative to preindustrial)"))
 rect(par("usr")[1], par("usr")[3],
      par("usr")[2], par("usr")[4],
        col = "grey80")
-for(i in seq(-25, 15, by = 5)){
-  abline(i, 8, lty = 3, col = "white")
-}
-for(i in seq(-25, 15, by = 5)){
-  abline(i, 5, lty = 2, col = "white")
-}
+
+abline(0, 8, lty = 3, col = "white")
+abline(10, 8, lty = 3, col = "white")
+abline(-10, 8, lty = 3, col = "white")
+abline(0, 5, lty = 2, col = "white")
+abline(10, 5, lty = 2, col = "white")
+abline(-10, 5, lty = 2, col = "white")
+
 arrows(cps[1,], tps[2,], cps[3,], tps[2,], length = 0, 
        lwd = 0.75, col = "grey40")
 arrows(cps[2,], tps[1,], cps[2,], tps[3,], length = 0, 
@@ -152,14 +154,14 @@ lines(cps[2,], tps[2,], lwd = 2, col = "grey40")
 points(cps[2,], tps[2,], pch = 21, bg = cols[ci], 
        col = "grey40", cex = 1.25)
 
-arrows(tring$C_025, tring$T_5, tring$C_975, tring$T_5, length = 0,
+arrows(tring$C_025[-8], tring$T_5[-8], tring$C_975[-8], tring$T_5[-8], length = 0,
        lwd = 0.75)
-arrows(tring$C_5, tring$T_025, tring$C_5, tring$T_975, length = 0,
+arrows(tring$C_5[-8], tring$T_025[-8], tring$C_5[-8], tring$T_975[-8], length = 0,
        lwd = 0.75)
-lines(tring$C_5, tring$T_5, lwd = 2)
-points(tring$C_5, tring$T_5, pch = 22, bg = cols[tringi], cex = 2.5)
+lines(tring$C_5[-8], tring$T_5[-8], lwd = 2)
+points(tring$C_5[-8], tring$T_5[-8], pch = 22, bg = cols[tringi], cex = 2.5)
 
-text(tring$C_5, tring$T_5, round(tring$Age_mean), cex = 0.75)
+text(tring$C_5[-8], tring$T_5[-8], round(tring$Age_mean[-8]), cex = 0.75)
 
 text(cps[2, 13], tps[2, 13] - 0.3, "60", pos = 2, 
      col = "grey40")
@@ -178,13 +180,13 @@ text(1.52, -2, "5 \u00B0C/doubling", col = "white",
      srt = (sin(4.8 / (diff(par("usr")[3:4]) / diff(par("usr")[1:2]))))/pi*180)
 text(0.95, -1.8, "8 \u00B0C/doubling", col = "white",
      srt = (sin(8 / (diff(par("usr")[3:4]) / diff(par("usr")[1:2]))))/pi*180)
-legend("bottomright", legend = c("Quaternary", "Pliocene", 
+legend("bottomright", legend = c("Pleistocene", "Pliocene", 
                                  "Miocene", "Oligocene", 
                                  "Eocene", "Paleocene"),
        pt.bg = cols, pch = 21, bg = "grey80")
 axis(1, at = (log(c(250, 500, 1000, 1500)) - log(280)) / log(2), 
      labels = c("250", "500", "1000", "1500"), line = 5)
-mtext(expression("CO"[2]*" (ppmv)"), 1, line = 8)
+mtext(expression("CO"[2]*" (ppm)"), 1, line = 8)
 box()
 dev.off()
 
@@ -288,6 +290,13 @@ library(openxlsx)
 # prep data
 dat = prepit()
 
+# timescale and colors
+cols = rev(rgb(matrix(c(249, 169, 112, 252, 188, 134, 254, 219, 171,
+                        255, 242, 0, 255, 249, 174, 254, 242, 227),
+                      ncol = 3, byrow = TRUE), maxColorValue = 255))
+epochs = c(0, 2.58, 5.33, 23, 33.9, 56)
+
+
 # Set up ages vector
 ages.bin = 1
 ages = agevec(68, ages.bin)
@@ -308,10 +317,11 @@ ages.c = ages[-(1:2)]
 # stats
 cps = (apply(cp.c, 2, quantile, probs = c(0.025, 0.5, 0.975)) - log(280)) / log(2)
 
-png("out/CO21Myr.png", width = 9, height = 5.5, units = "in", res = 600)
-par(mai = c(0.1, 1.1, 1.1, 0.9))
+png("out/FigS10_1.png", width = 9, height = 6, units = "in", res = 600)
+
+par(mai = c(0.1, 1.1, 1.1, 1.1))
 plot(-10, 0, ylab = "", xlab="Age (Ma)",  
-     xlim=c(65,0), ylim=c(3.5,8.3), axes = FALSE)
+     xlim=c(67,0), ylim=c(2.5,8.3), axes = FALSE)
 
 sc = rgb2hsv(col2rgb("dodgerblue2"))
 points(dat$pco2.age, dat$pco2, cex=0.5, 
@@ -320,25 +330,23 @@ points(dat$pco2.age, dat$pco2, cex=0.5,
 tsdens(cbind(ages, pts), "dodgerblue4")
 axis(2, c(log(100), log(250), log(500), log(1000), log(2000)),
      c(100, 250, 500, 1000, 2000))
-axis(3, seq(70, 0, by = -10))
+axis(3, c(66,0), lwd.ticks = 0, labels = FALSE)
+axis(3, seq(60, 0, by = -10))
 mtext(expression("CO"[2]*" (ppm)"), 2, line = 3, at = 6.2)
 mtext("Age (Ma)", 3, line = 3)
 
 ptop = par("usr")[4]
-enames = c("Qu", "Pl", "Miocene", "Oligocene", "Eocene", "Paleocene")
+enames = c("Ple", "Pli", "Miocene", "Oligocene", "Eocene", "Paleocene")
 for(i in 1:(length(epochs))){
   polygon(c(rep(c(epochs, 66)[i], 2), rep(c(epochs, 66)[i+1], 2)),
           c(ptop, rep(ptop - 0.3, 2), ptop), col = cols[i])
   text(mean(c(epochs, 66)[i:(i+1)]), ptop - 0.15, enames[i])
 }
-dev.off()
 
 # 100 kyr
 load("out/postCeno100kyr.rda")
 cp = p$BUGSoutput$sims.list$pco2_m
 cp = cp[,-(ncol(cp))]
-source("code/helpers.R")
-library(openxlsx)
 
 # prep data
 dat = prepit()
@@ -363,29 +371,19 @@ ages.c = ages[-(1:20)]
 # stats
 cps = (apply(cp.c, 2, quantile, probs = c(0.025, 0.5, 0.975)) - log(280)) / log(2)
 
-png("out/CO2100kyr.png", width = 9, height = 5.5, units = "in", res = 600)
-par(mai = c(0.1, 1.1, 1.1, 0.9))
+par(new = TRUE)
 plot(-10, 0, ylab = "", xlab="Age (Ma)",  
-     xlim=c(65,0), ylim=c(3.5,8.3), axes = FALSE)
+     xlim=c(67,0), ylim=c(4.5,10.3), axes = FALSE)
 
 sc = rgb2hsv(col2rgb("dodgerblue2"))
 points(dat$pco2.age, dat$pco2, cex=0.5, 
        col = hsv(sc[1], sc[2]/3, sc[3]))
 
 tsdens(cbind(ages, pts), "dodgerblue4")
-axis(2, c(log(100), log(250), log(500), log(1000), log(2000)),
+axis(4, c(log(100), log(250), log(500), log(1000), log(2000)),
      c(100, 250, 500, 1000, 2000))
-axis(3, seq(70, 0, by = -10))
-mtext(expression("CO"[2]*" (ppm)"), 2, line = 3, at = 6.2)
-mtext("Age (Ma)", 3, line = 3)
+mtext(expression("CO"[2]*" (ppm)"), 4, line = 3, at = 6.2)
 
-ptop = par("usr")[4]
-enames = c("Qu", "Pl", "Miocene", "Oligocene", "Eocene", "Paleocene")
-for(i in 1:(length(epochs))){
-  polygon(c(rep(c(epochs, 66)[i], 2), rep(c(epochs, 66)[i+1], 2)),
-          c(ptop, rep(ptop - 0.3, 2), ptop), col = cols[i])
-  text(mean(c(epochs, 66)[i:(i+1)]), ptop - 0.15, enames[i])
-}
 dev.off()
 
 
