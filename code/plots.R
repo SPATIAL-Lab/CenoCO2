@@ -119,8 +119,8 @@ postscript("out/CenozoicCO2.eps")
 rp()
 dev.off()
 
+# ESS plot ----
 
-# ESS plot
 library(RColorBrewer)
 cols = brewer.pal(6, "YlOrRd")
 
