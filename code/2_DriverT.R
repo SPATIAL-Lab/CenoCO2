@@ -30,7 +30,7 @@ n.iter = 12000
 n.burnin = 2000
 n.thin = trunc((n.iter - n.burnin) / 2500)
 pt = proc.time()
-p = do.call(jags.parallel, list(model.file = "code/model_T.R", parameters.to.save = parameters, 
+p = do.call(jags.parallel, list(model.file = "code/models/model_T.R", parameters.to.save = parameters, 
                                       data = dat, inits = NULL, n.chains = 4, n.iter = n.iter, 
                                       n.burnin = n.burnin, n.thin = n.thin) )
 proc.time() - pt

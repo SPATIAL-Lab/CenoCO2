@@ -3,7 +3,7 @@
 #Load libraries
 library(R2jags)
 library(openxlsx)
-source("code/helpers.R")
+source("code/8_Helpers.R")
 
 #500 kyr bins for main text ----
 
@@ -40,7 +40,7 @@ n.iter = 100000
 n.burnin = 20000
 n.thin = trunc((n.iter - n.burnin) / 2500)
 pt = proc.time()
-p = do.call(jags.parallel, list(model.file = "code/model.R", parameters.to.save = parameters, 
+p = do.call(jags.parallel, list(model.file = "code/models/model.R", parameters.to.save = parameters, 
                                       data = dat, inits = NULL, n.chains = 4, n.iter = n.iter, 
                                       n.burnin = n.burnin, n.thin = n.thin) )
 proc.time() - pt
