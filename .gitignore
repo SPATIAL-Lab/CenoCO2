@@ -39,4 +39,4 @@ vignettes/*.pdf
 .Renviron
 
 # Output
-out/
+bigout/

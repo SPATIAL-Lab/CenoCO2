@@ -16,7 +16,7 @@ tsdens = function(d, base = "black"){
   lines(d[, 1], d[, 4], col = cols[3], lwd = 2)
 }
 
-# Adds time series to plot w 2 prob density envelopes
+# Adds time series to plot w 2 prob density envelopes - solid color
 tsdens.s = function(d, base = "black"){
   #Check dimensions of d
   if(ncol(d) != 6){stop("d cols should be should be time, 5%, 25%, 50%, 75%, 95% CI")}
