@@ -36,8 +36,8 @@ dat = list(pco2.age = dat$pco2.age, lc = lc, lp = lp,
 parameters = c("pco2_m", "pco2_m.pre", "pco2_m.eps.ac", "pco2.off", "pco2.ai")
 
 ##Run it
-n.iter = 100000
-n.burnin = 20000
+n.iter = 5e5
+n.burnin = 5e4
 n.thin = trunc((n.iter - n.burnin) / 2500)
 pt = proc.time()
 p = do.call(jags.parallel, list(model.file = "code/model.R", parameters.to.save = parameters, 
