@@ -45,7 +45,7 @@ p = do.call(jags.parallel, list(model.file = "code/models/model.R", parameters.t
                                       n.burnin = n.burnin, n.thin = n.thin) )
 proc.time() - pt
 
-save(p, file = "out/postCenoLERAM.rda")
+save(p, file = "bigout/postCenoLERAM.rda")
 
 # 1 Myr bins for SI ----
 
@@ -78,17 +78,17 @@ dat = list(pco2.age = dat$pco2.age, lc = lc, lp = lp,
 parameters = c("pco2_m", "pco2_m.pre", "pco2_m.eps.ac", "pco2.off", "pco2.ai")
 
 ##Run it
-n.iter = 100000
-n.burnin = 20000
+n.iter = 5e5
+n.burnin = 5e4
 n.thin = trunc((n.iter - n.burnin) / 2500)
 
 pt = proc.time()
-p = do.call(jags.parallel, list(model.file = "code/model.R", parameters.to.save = parameters, 
+p = do.call(jags.parallel, list(model.file = "code/models/model.R", parameters.to.save = parameters, 
                                 data = dat, inits = NULL, n.chains = 4, n.iter = n.iter, 
                                 n.burnin = n.burnin, n.thin = n.thin) )
 proc.time() - pt
 
-save(p, file = "out/postCeno1Myr.rda")
+save(p, file = "bigout/postCeno1Myr.rda")
 
 #100 kyr bins for SI ----
 
@@ -121,14 +121,14 @@ dat = list(pco2.age = dat$pco2.age, lc = lc, lp = lp,
 parameters = c("pco2_m", "pco2_m.pre", "pco2_m.eps.ac", "pco2.off", "pco2.ai")
 
 ##Run it
-n.iter = 100000
-n.burnin = 20000
+n.iter = 5e5
+n.burnin = 5e4
 n.thin = trunc((n.iter - n.burnin) / 2500)
 
 pt = proc.time()
-p = do.call(jags.parallel, list(model.file = "code/model.R", parameters.to.save = parameters, 
+p = do.call(jags.parallel, list(model.file = "code/models/model.R", parameters.to.save = parameters, 
                                 data = dat, inits = NULL, n.chains = 4, n.iter = n.iter, 
                                 n.burnin = n.burnin, n.thin = n.thin) )
 proc.time() - pt
 
-save(p, file = "out/postCeno100kyr.rda")
+save(p, file = "bigout/postCeno100kyr.rda")
