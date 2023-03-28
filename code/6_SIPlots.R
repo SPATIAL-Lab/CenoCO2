@@ -33,7 +33,7 @@ for(i in 1:ncol(cp.ex)){
 }
 
 #Plot it
-png("out/FigS10_2.png", width = 9, height = 5, units = "in", 
+png("out/FigS10_3.png", width = 9, height = 5, units = "in", 
     res = 600)
 par(mai = c(1.1, 1.1, 0.1, 0.8))
 plot(0, 0, xlim = c(16, 0), ylim = c(100, 600), type = "n",
@@ -78,7 +78,7 @@ for(i in 1:ncol(cp.ex)){
 }
 
 #Plot it
-png("out/FigS10_3.png", width = 9, height = 5, units = "in", 
+png("out/FigS10_4.png", width = 9, height = 5, units = "in", 
     res = 600)
 par(mai = c(1.1, 1.1, 0.1, 0.8))
 plot(0, 0, xlim = c(16, 0), ylim = c(-150, 350), type = "n",
@@ -107,7 +107,7 @@ dev.off()
 source("code/4_PrepForPlots.R")
 
 # 1 Myr
-png("out/FigS10_1.png", width = 9, height = 6, units = "in", res = 600)
+png("out/FigS10_2.png", width = 9, height = 6, units = "in", res = 600)
 
 par(mai = c(0.1, 1.1, 1.1, 1.1))
 plot(-10, 0, ylab = "", xlab="Age (Ma)",  
@@ -148,3 +148,33 @@ axis(4, c(log(100), log(250), log(500), log(1000), log(2000)),
 mtext(expression("CO"[2]*" (ppm)"), 4, line = 3, at = 6.2)
 
 dev.off()
+
+# Compare w Hansen curves ----
+
+hf = read.csv("data/Hansen13fixed.csv")
+hv = read.csv("data/Hansen13Russell2_3.csv")
+
+png("out/FigS10_5.png", width = 9, height = 6, units = "in", res = 600)
+
+par(mai = c(0.1, 1.1, 1.1, 1.1))
+plot(-10, 0, ylab = "", xlab="Age (Ma)",  
+     xlim=c(67,0), ylim=c(0, 2000), axes = FALSE)
+
+tsdens(cbind(cp[,1], exp(cp[,-1])), "dodgerblue4")
+axis(2, c(log(100), log(250), log(500), log(1000), log(2000)),
+     c(100, 250, 500, 1000, 2000))
+axis(3, c(66,0), lwd.ticks = 0, labels = FALSE)
+axis(3, seq(60, 0, by = -10))
+mtext(expression("CO"[2]*" (ppm)"), 2, line = 3, at = 6.2)
+mtext("Age (Ma)", 3, line = 3)
+
+ptop = par("usr")[4]
+enames = c("Ple", "Pli", "Miocene", "Oligocene", "Eocene", "Paleocene")
+for(i in 1:(length(epochs))){
+  polygon(c(rep(c(epochs, 66)[i], 2), rep(c(epochs, 66)[i+1], 2)),
+          c(ptop, rep(ptop - 0.3, 2), ptop), col = cols[i])
+  text(mean(c(epochs, 66)[i:(i+1)]), ptop - 0.15, enames[i])
+}
+
+lines(hf$Ma, hf$CO2)
+lines(hv$Ma, hv$CO2)
