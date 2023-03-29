@@ -7,26 +7,36 @@ wscols = c("#08306b", "#08519c", "#2171b5", "#4292c6", "#6baed6",
            "#9ecae1", "#c6dbef", "#deebf7", "#fee0d2", "#fcbba1",
            "#fc9272", "#fb6a4a", "#ef3b2c", "#cb181d", "#a50f15",
            "#67000d")
-ccol = floor((cp$X50. - min(cp$X50.)) / diff(range(cp$X50.)) * 
-  (length(wscols) - 1e-6) + 1)
 tcol = floor((tp$X50. - min(tp$X50.)) / diff(range(tp$X50.)) * 
                (length(wscols) - 1e-6) + 1)
 
+cp.trunc = cp[7:nrow(cp),]
+
 # Version 1
-png("out/ws1.png", width = 6, height = 3, units = "in", res = 600)
-par(mai = c(0.1, 0, 0.1, 0))
-plot(0, 0, type = "n", xlim = c(68, 0), ylim = c(-1, 1), axes = FALSE,
+png("out/PrintFig.png", width = 6, height = 2.9, units = "in", res = 600)
+par(mai = c(0.5, 0, 0, 0.6))
+plot(0, 0, type = "n", xlim = c(65, 0), ylim = c(0, 1), axes = FALSE,
      xlab = "", ylab = "")
-for(i in seq_along(cp$ages)){
-  polygon(c(rep(cp$ages[i] - 0.25, 2), rep(cp$ages[i] + 0.25, 2)),
-          c(0, 1, 1, 0), col = wscols[ccol[i]], border = NA)
+for(i in 7:nrow(tp)){
   polygon(c(rep(tp$ages[i] - 0.25, 2), rep(tp$ages[i] + 0.25, 2)),
-          c(0, -1, -1, 0), col = wscols[tcol[i]], border = NA)
+          c(0, 1, 1, 0), col = wscols[tcol[i]], border = NA)
 }
-polygon(c(rep(min(cp$ages) - 0.25, 2), rep(max(cp$ages) + 0.25, 2)),
-        c(-1, 0, 0, -1))
-polygon(c(rep(min(cp$ages) - 0.25, 2), rep(max(cp$ages) + 0.25, 2)),
+lines(cp.trunc$ages, (cp.trunc$X50. - min(cp.trunc$X50.)) / diff(range(cp.trunc$X50.))
+      * 0.9 + 0.05, lw = 3, col = "white")
+lines(cp.trunc$ages, (cp.trunc$X50. - min(cp.trunc$X50.)) / diff(range(cp.trunc$X50.))
+      * 0.9 + 0.05, lw = 2)
+polygon(c(65, 65, 0, 0),
         c(1, 0, 0, 1))
+axis(1, c(51, 33.9, 2.6), labels = FALSE, pos = 0)
+mtext(c(51, 33.9, 2.6), 1, at = c(51, 33.9, 2.6), cex = 0.7)
+mtext("Millions of years before present", 1, 1, cex = 0.9)
+ticks = c((log(270) - min(cp.trunc$X50.)) / diff(range(cp.trunc$X50.)) * 0.9 + 0.05,
+          (log(720) - min(cp.trunc$X50.)) / diff(range(cp.trunc$X50.)) * 0.9 + 0.05,
+          (log(1600) - min(cp.trunc$X50.)) / diff(range(cp.trunc$X50.)) * 0.9 + 0.05)
+axis(4, ticks, labels = FALSE, pos = 0)
+mtext(c(270, 720, 1600), 4, -0.4, at = ticks, cex = 0.7)
+mtext(expression("Atmospheric CO"[2]*" (ppm)"), 4, 1, cex = 0.9)
+
 dev.off()
 
 # Version 2

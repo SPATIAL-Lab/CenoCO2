@@ -149,32 +149,66 @@ mtext(expression("CO"[2]*" (ppm)"), 4, line = 3, at = 6.2)
 
 dev.off()
 
-# Compare w Hansen curves ----
+# Compare w Hansen 2013 curve ----
 
-hf = read.csv("data/Hansen13fixed.csv")
-hv = read.csv("data/Hansen13Russell2_3.csv")
+hv = read.csv("data/Hansen13Russell.csv")
 
-png("out/FigS10_5.png", width = 9, height = 6, units = "in", res = 600)
+png("out/FigS10_5.png", width = 9, height = 5.2, units = "in", res = 600)
 
 par(mai = c(0.1, 1.1, 1.1, 1.1))
 plot(-10, 0, ylab = "", xlab="Age (Ma)",  
-     xlim=c(67,0), ylim=c(0, 2000), axes = FALSE)
+     xlim=c(67,35), ylim=c(5.9, 8), axes = FALSE)
 
-tsdens(cbind(cp[,1], exp(cp[,-1])), "dodgerblue4")
-axis(2, c(log(100), log(250), log(500), log(1000), log(2000)),
-     c(100, 250, 500, 1000, 2000))
-axis(3, c(66,0), lwd.ticks = 0, labels = FALSE)
-axis(3, seq(60, 0, by = -10))
-mtext(expression("CO"[2]*" (ppm)"), 2, line = 3, at = 6.2)
+polygon(c(hv$Ma, rev(hv$Ma)), c(log(hv$CO2.23), rev(log(hv$CO2.Full))),
+        col = "grey", lty = 0)
+lines(hv$Ma, log(hv$CO2.23))
+lines(hv$Ma, log(hv$CO2.Full))
+
+tsdens(cp[-c(1:5),], "dodgerblue4")
+axis(2, c(log(500), log(1000), log(2000)),
+     c(500, 1000, 2000))
+axis(3, c(66, 33.9), lwd.ticks = 0, labels = FALSE)
+axis(3, seq(60, 40, by = -10))
+mtext(expression("CO"[2]*" (ppm)"), 2, line = 3, at = 6.95)
 mtext("Age (Ma)", 3, line = 3)
 
 ptop = par("usr")[4]
 enames = c("Ple", "Pli", "Miocene", "Oligocene", "Eocene", "Paleocene")
-for(i in 1:(length(epochs))){
+for(i in 5:6){
   polygon(c(rep(c(epochs, 66)[i], 2), rep(c(epochs, 66)[i+1], 2)),
           c(ptop, rep(ptop - 0.3, 2), ptop), col = cols[i])
   text(mean(c(epochs, 66)[i:(i+1)]), ptop - 0.15, enames[i])
 }
 
-lines(hf$Ma, hf$CO2)
-lines(hv$Ma, hv$CO2)
+dev.off()
+
+# Alternative version full Cenozoic
+
+png("out/FigS10_5_full.png", width = 9, height = 5.2, units = "in", res = 600)
+
+par(mai = c(0.1, 1.1, 1.1, 1.1))
+plot(-10, 0, ylab = "", xlab="Age (Ma)",  
+     xlim=c(65,0), ylim=c(5.2, 8), axes = FALSE)
+
+polygon(c(hv$Ma, rev(hv$Ma)), c(log(hv$CO2.23), rev(log(hv$CO2.Full))),
+        col = "grey", lty = 0)
+lines(hv$Ma, log(hv$CO2.23))
+lines(hv$Ma, log(hv$CO2.Full))
+
+tsdens(cp[-c(1:5),], "dodgerblue4")
+axis(2, c(log(250), log(500), log(1000), log(2000)),
+     c(250, 500, 1000, 2000))
+axis(3, c(66, 0), lwd.ticks = 0, labels = FALSE)
+axis(3, seq(60, 0, by = -10))
+mtext(expression("CO"[2]*" (ppm)"), 2, line = 3, at = 6.6)
+mtext("Age (Ma)", 3, line = 3)
+
+ptop = par("usr")[4]
+enames = c("Ple", "Pli", "Miocene", "Oligocene", "Eocene", "Paleocene")
+for(i in 1:6){
+  polygon(c(rep(c(epochs, 66)[i], 2), rep(c(epochs, 66)[i+1], 2)),
+          c(ptop, rep(ptop - 0.3, 2), ptop), col = cols[i])
+  text(mean(c(epochs, 66)[i:(i+1)]), ptop - 0.15, enames[i])
+}
+
+dev.off()
