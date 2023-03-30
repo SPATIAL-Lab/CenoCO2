@@ -12,7 +12,7 @@ tcol = floor((tp$X50. - min(tp$X50.)) / diff(range(tp$X50.)) *
 
 cp.trunc = cp[7:nrow(cp),]
 
-# Version 1
+# Version for print
 png("out/PrintFig.png", width = 6, height = 2.9, units = "in", res = 600)
 par(mai = c(0.5, 0, 0, 0.6))
 plot(0, 0, type = "n", xlim = c(65, 0), ylim = c(0, 1), axes = FALSE,
@@ -37,48 +37,6 @@ axis(4, ticks, labels = FALSE, pos = 0)
 mtext(c(270, 720, 1600), 4, -0.4, at = ticks, cex = 0.7)
 mtext(expression("Atmospheric CO"[2]*" (ppm)"), 4, 1, cex = 0.9)
 
-dev.off()
-
-# Version 2
-png("out/ws2.png", width = 6, height = 3, units = "in", res = 600)
-par(mai = c(0.1, 0, 0.1, 0.25))
-plot(0, 0, type = "n", xlim = c(68, 0), ylim = c(-1, 1), axes = FALSE,
-     xlab = "", ylab = "")
-for(i in seq_along(cp$ages)){
-  polygon(c(rep(cp$ages[i] - 0.25, 2), rep(cp$ages[i] + 0.25, 2)),
-          c(0, 1, 1, 0), col = wscols[ccol[i]], border = NA)
-  polygon(c(rep(tp$ages[i] - 0.25, 2), rep(tp$ages[i] + 0.25, 2)),
-          c(0, -1, -1, 0), col = wscols[tcol[i]], border = NA)
-}
-polygon(c(rep(min(cp$ages) - 0.25, 2), rep(max(cp$ages) + 0.25, 2)),
-        c(-1, 0, 0, -1))
-polygon(c(rep(min(cp$ages) - 0.25, 2), rep(max(cp$ages) + 0.25, 2)),
-        c(1, 0, 0, 1))
-mtext(expression("CO"[2]), 4, line = -1.2, padj = 1, at = 0.5)
-mtext("Temperature", 4, line = -1.2, padj = 1, at = -0.5)
-dev.off()
-
-# Version 3
-png("out/ws3.png", width = 6, height = 3, units = "in", res = 600)
-par(mai = c(0.1, 0, 0.1, 0.25))
-plot(0, 0, type = "n", xlim = c(68, 0), ylim = c(-1, 1), axes = FALSE,
-     xlab = "", ylab = "")
-for(i in seq_along(cp$ages)){
-  polygon(c(rep(cp$ages[i] - 0.25, 2), rep(cp$ages[i] + 0.25, 2)),
-          c(0, 1, 1, 0), col = wscols[ccol[i]], border = NA)
-  polygon(c(rep(tp$ages[i] - 0.25, 2), rep(tp$ages[i] + 0.25, 2)),
-          c(0, -1, -1, 0), col = wscols[tcol[i]], border = NA)
-}
-polygon(c(rep(min(cp$ages) - 0.25, 2), rep(max(cp$ages) + 0.25, 2)),
-        c(-1, 0, 0, -1))
-polygon(c(rep(min(cp$ages) - 0.25, 2), rep(max(cp$ages) + 0.25, 2)),
-        c(1, 0, 0, 1))
-lines(cp$ages, (cp$X50. - min(cp$X50.)) / diff(range(cp$X50.))
-      * 0.9 + 0.05)
-lines(tp$ages, (tp$X50. - min(tp$X50.)) / diff(range(tp$X50.))
-      * 0.9 - 0.95)
-mtext(expression("CO"[2]), 4, line = -1.2, padj = 1, at = 0.5)
-mtext("Temperature", 4, line = -1.2, padj = 1, at = -0.5)
 dev.off()
 
 # Timeseries slide for talks ----
