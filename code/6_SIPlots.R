@@ -36,10 +36,10 @@ for(i in 1:ncol(cp.ex)){
 png("out/FigS10_3.png", width = 9, height = 5, units = "in", 
     res = 600)
 par(mai = c(1.1, 1.1, 0.1, 0.8))
-plot(0, 0, xlim = c(16, 0), ylim = c(100, 600), type = "n",
+plot(0, 0, xlim = c(16, 0), ylim = c(100, 625), type = "n",
      axes = FALSE, xlab = "Age (Ma)", ylab = "")
 lines(c(30, 0), rep(modCO2, 2), col = "red", lty = 2, lwd = 2)
-for(i in 1:250){
+for(i in 1:500){
   lines(ages, exp(cp[runif(1, 1, nrow(cp)),]), 
         col = rgb(0, 0, 0, 0.05), lwd=2)
 }
@@ -81,10 +81,10 @@ for(i in 1:ncol(cp.ex)){
 png("out/FigS10_4.png", width = 9, height = 5, units = "in", 
     res = 600)
 par(mai = c(1.1, 1.1, 0.1, 0.8))
-plot(0, 0, xlim = c(16, 0), ylim = c(-150, 350), type = "n",
+plot(0, 0, xlim = c(16, 0), ylim = c(-150, 375), type = "n",
      axes = FALSE, xlab = "Age (Ma)", ylab = "")
 lines(c(30, 0), rep(modanom, 2), col = "red", lty = 2, lwd = 2)
-for(i in 1:250){
+for(i in 1:500){
   lines(ages, cp.anom[runif(1, 1, nrow(cp.anom)),], 
         col = rgb(0, 0, 0, 0.05), lwd=2)
 }
