@@ -2,6 +2,7 @@
 library(rjags)
 library(R2jags)
 library(openxlsx)
+source("code/8_helpers.R")
 
 #Read proxy data
 df = "data/Westerhold.xlsx"
@@ -35,4 +36,33 @@ p = do.call(jags.parallel, list(model.file = "code/models/model_T.R", parameters
                                       n.burnin = n.burnin, n.thin = n.thin) )
 proc.time() - pt
 
-save(p, file = "out/postTemp.rda")
+save(p, file = "bigout/postTemp.rda")
+
+#100 kyr for stripes
+
+#Set up ages vector
+ages.bin = 0.1
+ages = agevec(70, ages.bin)
+ages.len = length(ages)
+
+
+#Age index
+d$ai = ceiling((70 - d$age) / ages.bin)
+
+##Data to pass to BUGS model
+dat = list("tData" = d$temp, "t.ind" = d$ai, "al" = ages.len)
+
+##Parameters to save
+parameters = c("t_m", "t_m.pre", "t_m.eps.ac")
+
+##Run it
+n.iter = 12000
+n.burnin = 2000
+n.thin = trunc((n.iter - n.burnin) / 2500)
+pt = proc.time()
+p = do.call(jags.parallel, list(model.file = "code/models/model_T.R", parameters.to.save = parameters, 
+                                data = dat, inits = NULL, n.chains = 4, n.iter = n.iter, 
+                                n.burnin = n.burnin, n.thin = n.thin) )
+proc.time() - pt
+
+save(p, file = "bigout/postTemp100kyr.rda")
