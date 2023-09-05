@@ -39,9 +39,9 @@ agevec = function(start, ages.bin){
 }
 
 # Prep the data and timeseries
-prepit = function(){
+prepit = function(df){
   #Read proxy data
-  df = "data/220602_proxies.xlsx"
+  df = file.path("data", df)
   d = read.xlsx(df, sheet = "all data product")
   
   #Data subset 

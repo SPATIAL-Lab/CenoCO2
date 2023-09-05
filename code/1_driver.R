@@ -1,41 +1,42 @@
-#Preliminaries ----
+# Preliminaries ----
 
-#Load libraries
+## Load libraries
 library(R2jags)
 library(openxlsx)
 source("code/8_Helpers.R")
 
-#500 kyr bins for main text ----
+# 500 kyr bins for main text ----
 
-#Set up ages vector
+## Set up ages vector
 ages.bin = 0.5
 ages = agevec(70, ages.bin)
 ages.len = length(ages)
 
-#prep data
-dat = prepit()
+## Prep data
+d = prepit("230902_proxies.xlsx")
 
-#parse localities
-locs = unique(dat$pco2.loc)
+## Parse localities
+locs = unique(d$pco2.loc)
 lc1 = lc2 = numeric(length(locs))
 lp = numeric(length(locs))
 
+## Get locality indices (first-last) and age uncertainties
 for(i in 1:length(locs)){
   if(i == 1){lc1[i] = 1}else{lc1[i] = lc2[i-1] + 1}
-  lc2[i] = lc1[i] + sum(dat$pco2.loc == locs[i]) - 1
-  lp[i] = 1 / mean(dat$pco2.age.sd[dat$pco2.loc == locs[i]])^2
+  lc2[i] = lc1[i] + sum(d$pco2.loc == locs[i]) - 1
+  lp[i] = 1 / mean(d$pco2.age.sd[d$pco2.loc == locs[i]])^2
 }
 lc = cbind(lc1, lc2)
 
-##Data to pass to BUGS model
-dat = list(pco2.age = dat$pco2.age, lc = lc, lp = lp, 
-           pco2 = dat$pco2, pco2.pre = dat$pco2.pre,
+## Data to pass to BUGS model
+dat = list(pco2.age = d$pco2.age, lc = lc, lp = lp, 
+           pco2 = d$pco2, pco2.pre = d$pco2.pre,
            al = ages.len, ages.bin = ages.bin)
 
-##Parameters to save
+## Parameters to save
 parameters = c("pco2_m", "pco2_m.pre", "pco2_m.eps.ac", "pco2.off", "pco2.ai")
 
-##Run it
+## Run it
 n.iter = 5e5
 n.burnin = 5e4
 n.thin = trunc((n.iter - n.burnin) / 2500)
@@ -49,35 +50,35 @@ save(p, file = "bigout/postCenoLERAM.rda")
 
 # 1 Myr bins for SI ----
 
-#Set up ages vector
+## Set up ages vector
 ages.bin = 1
 ages = agevec(70, ages.bin)
 ages.len = length(ages)
 
-#prep data
-dat = prepit()
+## Prep data
+d = prepit()
 
-#parse localities
-locs = unique(dat$pco2.loc)
+## Parse localities
+locs = unique(d$pco2.loc)
 lc1 = lc2 = numeric(length(locs))
 lp = numeric(length(locs))
 
 for(i in 1:length(locs)){
   if(i == 1){lc1[i] = 1}else{lc1[i] = lc2[i-1] + 1}
-  lc2[i] = lc1[i] + sum(dat$pco2.loc == locs[i]) - 1
-  lp[i] = 1 / mean(dat$pco2.age.sd[dat$pco2.loc == locs[i]])^2
+  lc2[i] = lc1[i] + sum(d$pco2.loc == locs[i]) - 1
+  lp[i] = 1 / mean(d$pco2.age.sd[d$pco2.loc == locs[i]])^2
 }
 lc = cbind(lc1, lc2)
 
-##Data to pass to BUGS model
-dat = list(pco2.age = dat$pco2.age, lc = lc, lp = lp, 
-           pco2 = dat$pco2, pco2.pre = dat$pco2.pre,
+## Data to pass to BUGS model
+dat = list(pco2.age = d$pco2.age, lc = lc, lp = lp, 
+           pco2 = d$pco2, pco2.pre = d$pco2.pre,
            al = ages.len, ages.bin = ages.bin)
 
-##Parameters to save
+## Parameters to save
 parameters = c("pco2_m", "pco2_m.pre", "pco2_m.eps.ac", "pco2.off", "pco2.ai")
 
-##Run it
+## Run it
 n.iter = 5e5
 n.burnin = 5e4
 n.thin = trunc((n.iter - n.burnin) / 2500)
@@ -90,37 +91,37 @@ proc.time() - pt
 
 save(p, file = "bigout/postCeno1Myr.rda")
 
-#100 kyr bins for SI ----
+# 100 kyr bins for SI ----
 
-#Set up ages vector
+## Set up ages vector
 ages.bin = 0.1
 ages = agevec(70, ages.bin)
 ages.len = length(ages)
 
-#prep data
-dat = prepit()
+## Prep data
+d = prepit()
 
-#parse localities
-locs = unique(dat$pco2.loc)
+## Parse localities
+locs = unique(d$pco2.loc)
 lc1 = lc2 = numeric(length(locs))
 lp = numeric(length(locs))
 
 for(i in 1:length(locs)){
   if(i == 1){lc1[i] = 1}else{lc1[i] = lc2[i-1] + 1}
-  lc2[i] = lc1[i] + sum(dat$pco2.loc == locs[i]) - 1
-  lp[i] = 1 / mean(dat$pco2.age.sd[dat$pco2.loc == locs[i]])^2
+  lc2[i] = lc1[i] + sum(d$pco2.loc == locs[i]) - 1
+  lp[i] = 1 / mean(d$pco2.age.sd[d$pco2.loc == locs[i]])^2
 }
 lc = cbind(lc1, lc2)
 
-##Data to pass to BUGS model
-dat = list(pco2.age = dat$pco2.age, lc = lc, lp = lp, 
-           pco2 = dat$pco2, pco2.pre = dat$pco2.pre,
+## Data to pass to BUGS model
+dat = list(pco2.age = d$pco2.age, lc = lc, lp = lp, 
+           pco2 = d$pco2, pco2.pre = d$pco2.pre,
            al = ages.len, ages.bin = ages.bin)
 
-##Parameters to save
+## Parameters to save
 parameters = c("pco2_m", "pco2_m.pre", "pco2_m.eps.ac", "pco2.off", "pco2.ai")
 
-##Run it
+## Run it
 n.iter = 5e5
 n.burnin = 5e4
 n.thin = trunc((n.iter - n.burnin) / 2500)
