@@ -1,12 +1,12 @@
 # Change vs modern ----
 
-# Load data
+## Load data
 load("bigout/postCenoLERAM.rda")
 cp = p$BUGSoutput$sims.list$pco2_m
 cp = cp[,-(ncol(cp))]
 cp = cp[,-(1:4)]
 
-# Age vector
+## Age vector
 source("code/8_Helpers.R")
 ages.bin = 0.5
 ages.max = 68
@@ -14,13 +14,13 @@ ages = agevec(ages.max, ages.bin)
 ages.len = length(ages)
 ages = ages[-length(ages)]
 
-# Make space
+## Make space
 mod.p = double()
 
-# Approach 1, using modern value
+## Approach 1, using modern value
 modCO2 = 418
 
-# Number of curves exceeding
+## Number of curves exceeding
 curve.p = double()
 cp.ex = exp(cp) > modCO2
 for(i in 1:ncol(cp.ex)){
@@ -32,7 +32,7 @@ for(i in 1:ncol(cp.ex)){
   curve.p[i] = sum(ct) / nrow(cp.ex)
 }
 
-#Plot it
+## Plot it
 png("out/FigS10_3.png", width = 9, height = 5, units = "in", 
     res = 600)
 par(mai = c(1.1, 1.1, 0.1, 0.8))
@@ -57,7 +57,7 @@ axis(4, c(0.0001, 0.05, 0.5) ^ (1/3),
 mtext("P(Exceedance)", 4, line = 2, at = 0.05 ^ (1/3))
 dev.off()
 
-# Approach 2, using change from preindustrial
+## Approach 2, using change from preindustrial
 cp.anom = cp
 for(i in 1:nrow(cp)){
   cp.anom[i,] = exp(cp[i,]) - exp(cp[i, ncol(cp)])
@@ -77,7 +77,7 @@ for(i in 1:ncol(cp.ex)){
   curve.p[i] = sum(ct) / nrow(cp.ex)
 }
 
-#Plot it
+## Plot it
 png("out/FigS10_4.png", width = 9, height = 5, units = "in", 
     res = 600)
 par(mai = c(1.1, 1.1, 0.1, 0.8))
@@ -106,7 +106,7 @@ dev.off()
 
 source("code/4_PrepForPlots.R")
 
-# 1 Myr
+## 1 Myr
 png("out/FigS10_2.png", width = 9, height = 6, units = "in", res = 600)
 
 par(mai = c(0.1, 1.1, 1.1, 1.1))
@@ -133,7 +133,7 @@ for(i in 1:(length(epochs))){
   text(mean(c(epochs, 66)[i:(i+1)]), ptop - 0.15, enames[i])
 }
 
-# 100 kyr
+## 100 kyr
 par(new = TRUE)
 plot(-10, 0, ylab = "", xlab="Age (Ma)",  
      xlim=c(67,0), ylim=c(4.5,10.3), axes = FALSE)
@@ -182,7 +182,7 @@ for(i in 5:6){
 
 dev.off()
 
-# Alternative version full Cenozoic
+## Alternative version full Cenozoic
 
 png("out/FigS10_5_full.png", width = 9, height = 5.2, units = "in", res = 600)
 

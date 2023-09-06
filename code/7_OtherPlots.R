@@ -1,8 +1,8 @@
 # Warming stripes ----
-# Load data
+## Load data
 source("code/4_PrepForPlots.R")
 
-# Colors
+## Colors
 wscols = c("#08306b", "#08519c", "#2171b5", "#4292c6", "#6baed6",
            "#9ecae1", "#c6dbef", "#deebf7", "#fee0d2", "#fcbba1",
            "#fc9272", "#fb6a4a", "#ef3b2c", "#cb181d", "#a50f15",
@@ -12,6 +12,7 @@ cp.trunc = cp[7:nrow(cp),]
 tcol = floor((log(tp$X50.+10) - min(log(tp$X50.+10))) / diff(range(log(tp$X50.+10))) * 
                (length(wscols) - 1e-6) + 1)
 
+## Print figure
 png("out/PrintFig.png", width = 6, height = 2.9, units = "in", res = 600)
 par(mai = c(0.5, 0, 0, 0.6))
 plot(0, 0, type = "n", xlim = c(65, 0), ylim = c(0, 1), axes = FALSE,
@@ -69,7 +70,7 @@ dev.off()
 
 # Data density plots ----
 
-# Stats for data
+## Stats for data
 a1 = seq(0.5, 64.5, by = 0.1)
 nd1 = np1 = a1
 for(i in 1:length(a1)){
@@ -116,7 +117,6 @@ dev.off()
 
 # Illustrate age model uncertainty ----
 
-# Show age model uncertainty
 load("bigout/postCenoLERAM.rda")
 sl = p$BUGSoutput$sims.list
 sl$pco2_m = sl$pco2_m[, -ncol(sl$pco2_m)]

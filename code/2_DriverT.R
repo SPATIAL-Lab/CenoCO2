@@ -1,32 +1,36 @@
-#Load libraries
+# Prep ----
+
+## Load libraries
 library(rjags)
 library(R2jags)
 library(openxlsx)
 source("code/8_helpers.R")
 
-#Read proxy data
+## Read proxy data
 df = "data/Westerhold.xlsx"
 d = read.xlsx(df, sheet = "data")
 
-#Data subset 
+## Data subset 
 d = d[,c(1,3)]
 names(d) = c("age", "temp")
 
-#Set up ages vector
+# 500 kyr for paper ----
+
+## Set up ages vector
 ages.bin = 0.5
 ages = seq(70, 0, by = 0 - ages.bin) - ages.bin / 2
 ages.len = length(ages)
 
-#Age index
+## Age index
 d$ai = ceiling((70 - d$age) / ages.bin)
 
-##Data to pass to BUGS model
+## Data to pass to BUGS model
 dat = list("tData" = d$temp, "t.ind" = d$ai, "al" = ages.len)
 
-##Parameters to save
+## Parameters to save
 parameters = c("t_m", "t_m.pre", "t_m.eps.ac")
 
-##Run it
+## Run it
 n.iter = 12000
 n.burnin = 2000
 n.thin = trunc((n.iter - n.burnin) / 2500)
@@ -38,24 +42,23 @@ proc.time() - pt
 
 save(p, file = "bigout/postTemp.rda")
 
-#100 kyr for stripes
+# 100 kyr for stripes ----
 
-#Set up ages vector
+## Set up ages vector
 ages.bin = 0.1
 ages = agevec(70, ages.bin)
 ages.len = length(ages)
 
-
-#Age index
+## Age index
 d$ai = ceiling((70 - d$age) / ages.bin)
 
-##Data to pass to BUGS model
+## Data to pass to BUGS model
 dat = list("tData" = d$temp, "t.ind" = d$ai, "al" = ages.len)
 
-##Parameters to save
+## Parameters to save
 parameters = c("t_m", "t_m.pre", "t_m.eps.ac")
 
-##Run it
+## Run it
 n.iter = 12000
 n.burnin = 2000
 n.thin = trunc((n.iter - n.burnin) / 2500)

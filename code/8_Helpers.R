@@ -1,7 +1,6 @@
-
-# Adds time series to plot w 2 prob density envelopes
+# Add time series to plot w 2 prob density envelopes
 tsdens = function(d, base = "black"){
-  #Check dimensions of d
+  # Check dimensions of d
   if(ncol(d) != 6){stop("d cols should be should be time, 5%, 25%, 50%, 75%, 95% CI")}
   
   base.rgb = col2rgb(base)
@@ -16,9 +15,9 @@ tsdens = function(d, base = "black"){
   lines(d[, 1], d[, 4], col = cols[3], lwd = 2)
 }
 
-# Adds time series to plot w 2 prob density envelopes - solid color
+# Add time series to plot w 2 prob density envelopes - solid color
 tsdens.s = function(d, base = "black"){
-  #Check dimensions of d
+  # Check dimensions of d
   if(ncol(d) != 6){stop("d cols should be should be time, 5%, 25%, 50%, 75%, 95% CI")}
   
   base.rgb = col2rgb(base)
@@ -33,18 +32,18 @@ tsdens.s = function(d, base = "black"){
   lines(d[, 1], d[, 4], col = cols[3], lwd = 2)
 }
 
-# Generates age vector
+# Generate age vector
 agevec = function(start, ages.bin){
   return(ages = seq(start, 0, by = 0 - ages.bin) - ages.bin / 2)
 }
 
 # Prep the data and timeseries
 prepit = function(df){
-  #Read proxy data
+  # Read proxy data
   df = file.path("data", df)
   d = read.xlsx(df, sheet = "all data product")
   
-  #Data subset 
+  # Data subset 
   d = d[,c("CO2_ppm", "CO2_uncertainty_pos_ppm", "CO2_uncertainty_neg_ppm",
            "age_Ma", "Age_uncertainty_pos_Ma", "Age_uncertainty_neg_Ma",
            "proxy", "locality")]
@@ -52,16 +51,16 @@ prepit = function(df){
   names(mod) = names(d)
   d = rbind(d, mod)
 
-  #Parse data - co2 mean and uncertainty
+  # Parse data - co2 mean and uncertainty
   pco2 = log(d$CO2_ppm)
-  ##Max and min in log deviations
+  # Max and min in log deviations
   pco2.mm = log(d$CO2_ppm + d$CO2_uncertainty_pos_ppm/2) - pco2
   pco2.mm = cbind(pco2.mm, pco2 - log(d$CO2_ppm - d$CO2_uncertainty__neg_ppm/2))
-  ##Average 1sd in log units
+  # Average 1sd in log units
   pco2.sd = apply(pco2.mm, 1, mean)
   pco2.pre = 1 / pco2.sd^2
   
-  #Parse data - ages and uncertainty
+  # Parse data - ages and uncertainty
   pco2.age = d$age_Ma
   pco2.age.sd = apply(cbind(d$Age_uncertainty_pos_Ma, d$Age_uncertainty_neg_Ma), 1, mean)
   pco2.loc = d$locality

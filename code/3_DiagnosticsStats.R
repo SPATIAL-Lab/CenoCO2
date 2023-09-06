@@ -2,35 +2,35 @@
 library(R2jags)
 load("bigout/postCenoLERAM.rda")
 
-# Traceplots
+## Traceplots
 R2jags::traceplot(p, varname = "pco2_m")
 R2jags::traceplot(p, varname = c("pco2_m.pre", "pco2_m.eps.ac"))
 dev.off()
 
-# Summary
+## Summary
 View(p$BUGSoutput$summary)
 
 # Process and save data ----
 source("code/8_Helpers.R")
 ## 500 kyr CO2 ----
-# Set up ages vector
+### Set up ages vector
 ages.bin = 0.5
 ages.max = 68
 ages = agevec(ages.max, ages.bin)
 ages.len = length(ages)
 ages = ages[-length(ages)]
 
-#Load data
+### Load data
 cp = p$BUGSoutput$sims.list$pco2_m
 cp = cp[,-(ncol(cp))]
 cp = cp[,-(1:4)]
 
-# Stats for timeseries plot
+### Stats for timeseries plot
 pts = apply(cp, 2, quantile, probs = c(0.025, 0.25, 0.5, 0.75, 0.975))
 pts = t(pts)
 pts = cbind(ages, pts)
 
-# Save
+### Save
 write.csv(pts, "out/500kyrCO2.csv", row.names = FALSE)
 
 ## 500 kyr Temp ----
@@ -38,15 +38,15 @@ load("bigout/postTemp.rda")
 tp = p$BUGSoutput$sims.list$t_m
 tp = tp[,-(ncol(tp))]
 
-# Trim posterior ts to get only 68 Ma to present
+### Trim posterior ts to get only 68 Ma to present
 tp = tp[,-(1:4)]
 
-# Stats for timeseries plot
+### Stats for timeseries plot
 tpts = apply(tp, 2, quantile, probs = c(0.025, 0.25, 0.5, 0.75, 0.975))
 tpts = t(tpts)
 tpts = cbind(ages, tpts)
 
-# Save
+### Save
 write.csv(tpts, "out/500kyrTemp.csv", row.names = FALSE)
 
 ## Ring temperature dataset ----
@@ -73,44 +73,44 @@ load("bigout/postCeno1Myr.rda")
 cp = p$BUGSoutput$sims.list$pco2_m
 cp = cp[,-(ncol(cp))]
 
-# Set up ages vector
+### Set up ages vector
 ages.bin = 1
 ages.max = 68
 ages = agevec(ages.max, ages.bin)
 ages.len = length(ages)
 ages = ages[-length(ages)]
 
-#trim posterior ts
+### Trim posterior ts
 cp = cp[,-(1:2)]
 
-# Stats for timeseries plot
+### Stats for timeseries plot
 pts = apply(cp, 2, quantile, probs = c(0.025, 0.25, 0.5, 0.75, 0.975))
 pts = t(pts)
 pts = cbind(ages, pts)
 
-# Save
+### Save
 write.csv(pts, "out/1MyrCO2.csv", row.names = FALSE)
 
 ## 100 kyr CO2 ----
-# Set up ages vector
+### Set up ages vector
 ages.bin = 0.1
 ages.max = 68
 ages = agevec(ages.max, ages.bin)
 ages.len = length(ages)
 ages = ages[-length(ages)]
 
-# Load data
+### Load data
 load("bigout/postCeno100kyr.rda")
 cp = p$BUGSoutput$sims.list$pco2_m
 cp = cp[,-(ncol(cp))]
 
-#trim posterior ts
+### Trim posterior ts
 cp = cp[,-(1:20)]
 
-# Stats for timeseries plot
+### Stats for timeseries plot
 pts = apply(cp, 2, quantile, probs = c(0.025, 0.25, 0.5, 0.75, 0.975))
 pts = t(pts)
 pts = cbind(ages, pts)
 
-# Save
+### Save
 write.csv(pts, "out/100kyrCO2.csv", row.names = FALSE)
