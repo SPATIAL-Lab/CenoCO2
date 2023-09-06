@@ -11,7 +11,7 @@ rp = function(){
   points(dat$pco2.age, dat$pco2, cex=0.5, 
          col = hsv(sc[1], sc[2]/3, sc[3]))
   
-  tsdens(cp, "dodgerblue4")
+  tsdens.s(cp, "dodgerblue4")
   axis(2, c(log(100), log(250), log(500), log(1000), log(2000)),
        c(100, 250, 500, 1000, 2000))
   axis(3, seq(70, 0, by = -10))
@@ -32,12 +32,12 @@ rp = function(){
        cex = 0.5, col = hsv(sc[1], sc[2]/10, 0.8),
        xlab = "", ylab = "")
   
-  tsdens(tp, "black")
+  tsdens.s(tp, "black")
   axis(4, seq(-5, 20, by=5), pos = -0.15)
   mtext("GMST (K, relative to preindustrial)", 4, line = 2, at = 7.5)
   
   rcol = col2rgb("grey40", TRUE)
-  rcol[4] = 80
+  rcol[4] = 255
   for(i in 1:nrow(tring)){
     lines(c(tring$Age_min[i], tring$Age_max[i]), rep(tring$T_5[i], 2), 
           lw = 2, lend = 1)    
@@ -81,7 +81,7 @@ abline(0, 5, lty = 2, col = "white")
 abline(10, 5, lty = 2, col = "white")
 abline(-10, 5, lty = 2, col = "white")
 
-arrows(cp.c[,2], tp.c[,3], cp.c[,4], tp.c[,2], length = 0, 
+arrows(cp.c[,2], tp.c[,3], cp.c[,4], tp.c[,3], length = 0, 
        lwd = 0.75, col = "grey40")
 arrows(cp.c[,3], tp.c[,2], cp.c[,3], tp.c[,4], length = 0, 
        lwd = 0.75, col = "grey40")

@@ -3,7 +3,7 @@ library(openxlsx)
 source("code/8_Helpers.R")
 
 # Prep proxy dataset
-dat = prepit()
+dat = prepit("230902_proxies.xlsx")
 
 # Read curves
 cp = read.csv("out/500kyrCO2.csv")
@@ -29,3 +29,4 @@ names(tdat) = c("age", "temp")
 
 # Ring dataset
 tring = read.csv("out/RingTemp.csv")
+
