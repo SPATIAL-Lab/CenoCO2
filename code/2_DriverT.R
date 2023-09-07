@@ -4,7 +4,7 @@
 library(rjags)
 library(R2jags)
 library(openxlsx)
-source("code/8_helpers.R")
+source("code/Helpers.R")
 
 ## Read proxy data
 df = "data/Westerhold.xlsx"

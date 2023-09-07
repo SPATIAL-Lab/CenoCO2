@@ -11,7 +11,7 @@ dev.off()
 View(p$BUGSoutput$summary)
 
 # Process and save data ----
-source("code/8_Helpers.R")
+source("code/Helpers.R")
 ## 500 kyr CO2 ----
 ### Set up ages vector
 ages.bin = 0.5

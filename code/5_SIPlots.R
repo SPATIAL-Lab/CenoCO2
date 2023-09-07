@@ -7,7 +7,7 @@ cp = cp[,-(ncol(cp))]
 cp = cp[,-(1:4)]
 
 ## Age vector
-source("code/8_Helpers.R")
+source("code/Helpers.R")
 ages.bin = 0.5
 ages.max = 68
 ages = agevec(ages.max, ages.bin)
@@ -33,7 +33,7 @@ for(i in 1:ncol(cp.ex)){
 }
 
 ## Plot it
-png("out/FigS10_3.png", width = 9, height = 5, units = "in", 
+png("out/SI_figs/FigS10_3.png", width = 9, height = 5, units = "in", 
     res = 600)
 par(mai = c(1.1, 1.1, 0.1, 0.8))
 plot(0, 0, xlim = c(16, 0), ylim = c(100, 625), type = "n",
@@ -78,7 +78,7 @@ for(i in 1:ncol(cp.ex)){
 }
 
 ## Plot it
-png("out/FigS10_4.png", width = 9, height = 5, units = "in", 
+png("out/SI_figs/FigS10_4.png", width = 9, height = 5, units = "in", 
     res = 600)
 par(mai = c(1.1, 1.1, 0.1, 0.8))
 plot(0, 0, xlim = c(16, 0), ylim = c(-150, 375), type = "n",
@@ -104,10 +104,10 @@ dev.off()
 
 # Alt resolutions ----
 
-source("code/4_PrepForPlots.R")
+source("code/PrepForPlots.R")
 
 ## 1 Myr
-png("out/FigS10_2.png", width = 9, height = 6, units = "in", res = 600)
+png("out/SI_figs/FigS10_2.png", width = 9, height = 6, units = "in", res = 600)
 
 par(mai = c(0.1, 1.1, 1.1, 1.1))
 plot(-10, 0, ylab = "", xlab="Age (Ma)",  
@@ -153,7 +153,7 @@ dev.off()
 
 hv = read.csv("data/Hansen13Russell.csv")
 
-png("out/FigS10_5.png", width = 9, height = 5.2, units = "in", res = 600)
+png("out/SI_figs/FigS10_5.png", width = 9, height = 5.2, units = "in", res = 600)
 
 par(mai = c(0.1, 1.1, 1.1, 1.1))
 plot(-10, 0, ylab = "", xlab="Age (Ma)",  
@@ -184,7 +184,7 @@ dev.off()
 
 ## Alternative version full Cenozoic
 
-png("out/FigS10_5_full.png", width = 9, height = 5.2, units = "in", res = 600)
+png("out/other_figs/FigS10_5_full.png", width = 9, height = 5.2, units = "in", res = 600)
 
 par(mai = c(0.1, 1.1, 1.1, 1.1))
 plot(-10, 0, ylab = "", xlab="Age (Ma)",  

@@ -1,6 +1,6 @@
 # Warming stripes ----
 ## Load data
-source("code/4_PrepForPlots.R")
+source("code/PrepForPlots.R")
 
 ## Colors
 wscols = c("#08306b", "#08519c", "#2171b5", "#4292c6", "#6baed6",
@@ -13,18 +13,21 @@ tcol = floor((log(tp$X50.+10) - min(log(tp$X50.+10))) / diff(range(log(tp$X50.+1
                (length(wscols) - 1e-6) + 1)
 
 ## Print figure
-png("out/PrintFig.png", width = 6, height = 2.9, units = "in", res = 600)
+png("out/main_figs/PrintFig.png", width = 6, height = 2.9, units = "in", res = 600)
 par(mai = c(0.5, 0, 0, 0.6))
 plot(0, 0, type = "n", xlim = c(65, 0), ylim = c(0, 1), axes = FALSE,
      xlab = "", ylab = "")
+### Warming stripes
 for(i in 7:nrow(tp)){
   polygon(c(rep(tp$ages[i] - 0.25, 2), rep(tp$ages[i] + 0.25, 2)),
           c(0, 1, 1, 0), col = wscols[tcol[i]], border = NA)
 }
+### CO2
 lines(cp.trunc$ages, (cp.trunc$X50. - min(cp.trunc$X50.)) / diff(range(cp.trunc$X50.))
       * 0.9 + 0.05, lw = 3, col = "white")
 lines(cp.trunc$ages, (cp.trunc$X50. - min(cp.trunc$X50.)) / diff(range(cp.trunc$X50.))
       * 0.9 + 0.05, lw = 2)
+### Axes
 polygon(c(65, 65, 0, 0),
         c(1, 0, 0, 1))
 axis(1, c(51, 33.9, 16, 2.6), labels = FALSE, pos = 0)
@@ -37,11 +40,36 @@ ticks = c((log(270) - min(cp.trunc$X50.)) / diff(range(cp.trunc$X50.)) * 0.9 + 0
 axis(4, ticks, labels = FALSE, pos = 0)
 mtext(c(270, 480, 720, 1600), 4, -0.4, at = ticks, cex = 0.7)
 mtext(expression("Atmospheric CO"[2]*" (ppm)"), 4, 1, cex = 0.9)
-
+### Legend
+legx.min = 61
+legx.max = legx.min - 20
+legy.min = 0.18
+legy.max = legy.min + 0.07
+n = length(wscols)
+xint = (legx.max - legx.min) / n
+polygon(c(legx.min, legx.min, legx.max, legx.max),
+        c(legy.min, legy.max, legy.max, legy.min), lwd = 4, 
+        border = "white", lend = 2, ljoin = 1)
+for(i in seq(n)){
+  polygon(c(rep(legx.min + xint * (i - 1), 2), rep(legx.min + xint * i, 2)),
+          c(legy.min, legy.max, legy.max, legy.min), border = NA,
+          col = wscols[i])
+}
+tticks = seq(legx.min, legx.max, length = 4)
+tvals = min(log(tp$X50.+10)) + diff(range(log(tp$X50.+10))) * seq(0, 1, length = 4)
+tvals = exp(tvals) - 10
+for(i in 1:4){
+  lines(rep(tticks[i], 2), c(legy.min, legy.min - 0.025), col = "white", 
+        lw = 2, lend = 1)
+  text(x = tticks[i], y = legy.min - 0.055, round(tvals[i], 1), col = "white", 
+       cex = 0.7)
+}
+text(mean(tticks), legy.min - 0.11, "Temperature (\u00B0C)", cex = 0.7, 
+     col = "white")
 dev.off()
 
 # Timeseries slide for talks ----
-png("out/CenozoicCO2_slide.png", width = 9, height = 6, units = "in", res = 600)
+png("out/other_figs/CenozoicCO2_slide.png", width = 9, height = 6, units = "in", res = 600)
 
 par(mai = c(1.1, 1.1, 0.1, 0.9))
 plot(-10, 0, ylab = "", xlab="Age (Ma)",  
@@ -87,7 +115,7 @@ for(i in 1:length(a5)){
   np5[i] = length(unique(ds$pco2.prox)) 
 }
 
-png("out/DataDens1.png", 9, 4.25, units = "in", res = 600)
+png("out/other_figs/DataDens1.png", 9, 4.25, units = "in", res = 600)
 par(mar = c(5,5,1,1))
 plot(a1, log(nd1), xlim = c(67, 0), type = "l", axes = FALSE,
      lwd = 3, xlab = "Age (Ma)", ylab = "# data per Myr",
@@ -103,7 +131,7 @@ legend(67, log(300), c("1 Myr bin", "5 Myr bin"), lty = c(1, 3),
        col = rgb(237, 125, 49, maxColorValue = 255))
 dev.off()
 
-png("out/DataDens2.png", 9, 4.25, units = "in", res = 600)
+png("out/other_figs/DataDens2.png", 9, 4.25, units = "in", res = 600)
 par(mar = c(5,5,1,1))
 plot(a1, np1, xlim = c(67, 0), type = "l", cex.axis = 1.5,
      ylim = c(0, 5), lwd = 3, xlab = "Age (Ma)", ylab = "# proxies",
@@ -123,7 +151,7 @@ sl$pco2_m = sl$pco2_m[, -ncol(sl$pco2_m)]
 # Problem point at 42.5 Ma
 le.ind = dat$pco2.age == 42.5
 
-png("out/ProblemPoint.png", width = 9, height = 6, units = "in", res = 600)
+png("out/other_figs/Age_uncert.png", width = 9, height = 6, units = "in", res = 600)
 par(mai = c(1.1, 1.1, 0.2, 1.1))
 plot(dat$pco2.age[le.ind], dat$pco2[le.ind], xlim = c(55, 25), ylim = c(5.5, 9.5),
      pch = 21, bg = "dark gray", axes = FALSE, xlab = ("Age(Ma)"),

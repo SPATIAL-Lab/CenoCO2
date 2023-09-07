@@ -1,5 +1,5 @@
 # Fig 2 ----
-source("code/4_PrepForPlots.R")
+source("code/PrepForPlots.R")
 
 ## Plotting function
 rp = function(){
@@ -51,7 +51,7 @@ rp = function(){
 
 ## png("out/CenozoicCO2.png", width = 9, height = 5.5, units = "in", res = 600) ##
 setEPS()
-postscript("out/Fig2.eps")
+postscript("out/main_figs/Fig2.eps")
 rp()
 dev.off()
 
@@ -65,7 +65,7 @@ ci = findInterval(cp.c$ages, epochs)
 tringi = findInterval(tring$Age_mean, epochs)
 
 ## Plot it
-png("out/Fig3.png", width = 6, height = 7, units = "in", res = 600)
+png("out/main_figs/Fig3.png", width = 6, height = 7, units = "in", res = 600)
 par(mai = c(2, 1, 0.2, 0.2))
 plot(cp.c[,3], tp.c[,2], xlim = range(cp.c[,-1]), ylim = range(tp.c[,-1]),
      xlab = expression("CO"[2]*" doublings (relative to preindustrial)"),
