@@ -33,6 +33,20 @@ pts = cbind(ages, pts)
 ### Save
 write.csv(pts, "out/500kyrCO2.csv", row.names = FALSE)
 
+### Load data - marine only
+load("bigout/postCenoMarOnly.rda")
+cp = p$BUGSoutput$sims.list$pco2_m
+cp = cp[,-(ncol(cp))]
+cp = cp[,-(1:4)]
+
+### Stats for timeseries plot
+pts = apply(cp, 2, quantile, probs = c(0.025, 0.25, 0.5, 0.75, 0.975))
+pts = t(pts)
+pts = cbind(ages, pts)
+
+### Save
+write.csv(pts, "out/500kyrCO2MarOnly.csv", row.names = FALSE)
+
 ## 500 kyr Temp ----
 load("bigout/postTemp.rda")
 tp = p$BUGSoutput$sims.list$t_m

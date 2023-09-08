@@ -9,6 +9,7 @@ dat = prepit("230902_proxies.xlsx")
 cp = read.csv("out/500kyrCO2.csv")
 cp1M = read.csv("out/1MyrCO2.csv")
 cp100k = read.csv("out/100kyrCO2.csv")
+cpm = read.csv("out/500kyrCO2MarOnly.csv")
 tp = read.csv("out/500kyrTemp.csv")
 
 # Trim to only Cenozoic and modify for ESS plot

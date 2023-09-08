@@ -212,3 +212,44 @@ for(i in 1:6){
 }
 
 dev.off()
+
+# Marine only comparison ----
+
+source("code/PrepForPlots.R")
+
+## Plot the CO2 record
+png("out/SI_figs/FigSxxx.png", width = 8, height = 6, units = "in", res = 600)
+
+par(mai = c(0.4, 1.1, 1.1, 1.1))
+plot(-10, 0, ylab = "", xlab="",  
+     xlim = c(67, 0), ylim = c(4, 8.3), axes = FALSE)
+
+tsdens(cpm, "darkred")
+tsdens(cp, "dodgerblue4")
+axis(2, c(log(250), log(500), log(1000), log(2000)),
+     c(250, 500, 1000, 2000))
+axis(3, c(66,0), lwd.ticks = 0, labels = FALSE)
+axis(3, seq(60, 0, by = -10))
+mtext(expression("CO"[2]*" (ppm)"), 2, line = 3, at = 6.5)
+mtext("Age (Ma)", 3, line = 3)
+
+ptop = par("usr")[4]
+enames = c("Ple", "Pli", "Miocene", "Oligocene", "Eocene", "Paleocene")
+for(i in 1:(length(epochs))){
+  polygon(c(rep(c(epochs, 66)[i], 2), rep(c(epochs, 66)[i+1], 2)),
+          c(ptop, rep(ptop - 0.3, 2), ptop), col = cols[i])
+  text(mean(c(epochs, 66)[i:(i+1)]), ptop - 0.15, enames[i], cex = 0.8)
+}
+
+## Add the 95% CI
+par(new = TRUE)
+plot(0, 0, ylab = "", xlab = "", xlim = c(67, 0), ylim = c(3, 11), 
+     axes = FALSE, type = "n")
+lines(cpm$ages, log(exp(cpm$X97.5.) - exp(cpm$X2.5.)), col = "darkred")
+lines(cp$ages, log(exp(cp$X97.5.) - exp(cp$X2.5.)), col = "dodgerblue4")
+
+axis(4, c(log(20), log(100), log(250), log(750)),
+     c(20, 100, 250, 750))
+mtext(expression("CO"[2]*" 95% CI (ppm)"), 4, line = 3, at = 4.8)
+
+dev.off()
