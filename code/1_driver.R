@@ -175,3 +175,5 @@ p = do.call(jags.parallel, list(model.file = "code/models/model.R", parameters.t
                                 data = dat, inits = NULL, n.chains = 4, n.iter = n.iter, 
                                 n.burnin = n.burnin, n.thin = n.thin) )
 proc.time() - pt
+
+save(p, file = "bigout/postCenoMarOnly.rda")
