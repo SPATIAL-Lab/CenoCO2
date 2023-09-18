@@ -18,7 +18,7 @@ ages = ages[-length(ages)]
 mod.p = double()
 
 ## Approach 1, using modern value
-modCO2 = 418
+modCO2 = 419
 
 ## Number of curves exceeding
 curve.p = double()
@@ -33,7 +33,7 @@ for(i in 1:ncol(cp.ex)){
 }
 
 ## Plot it
-png("out/SI_figs/FigS10_3.png", width = 9, height = 5, units = "in", 
+png("out/SI_figs/FigS11.png", width = 9, height = 5, units = "in", 
     res = 600)
 par(mai = c(1.1, 1.1, 0.1, 0.8))
 plot(0, 0, xlim = c(16, 0), ylim = c(100, 625), type = "n",
@@ -63,7 +63,7 @@ for(i in 1:nrow(cp)){
   cp.anom[i,] = exp(cp[i,]) - exp(cp[i, ncol(cp)])
 }
 
-modanom = 418 - 280
+modanom = 419 - 280
 
 ## Number of curves exceeding
 curve.p = double()
@@ -78,7 +78,7 @@ for(i in 1:ncol(cp.ex)){
 }
 
 ## Plot it
-png("out/SI_figs/FigS10_4.png", width = 9, height = 5, units = "in", 
+png("out/SI_figs/FigS12.png", width = 9, height = 5, units = "in", 
     res = 600)
 par(mai = c(1.1, 1.1, 0.1, 0.8))
 plot(0, 0, xlim = c(16, 0), ylim = c(-150, 375), type = "n",
@@ -107,7 +107,7 @@ dev.off()
 source("code/PrepForPlots.R")
 
 ## 1 Myr
-png("out/SI_figs/FigS10_2.png", width = 9, height = 6, units = "in", res = 600)
+png("out/SI_figs/FigS10.png", width = 9, height = 6, units = "in", res = 600)
 
 par(mai = c(0.1, 1.1, 1.1, 1.1))
 plot(-10, 0, ylab = "", xlab="Age (Ma)",  
@@ -130,7 +130,7 @@ enames = c("Ple", "Pli", "Miocene", "Oligocene", "Eocene", "Paleocene")
 for(i in 1:(length(epochs))){
   polygon(c(rep(c(epochs, 66)[i], 2), rep(c(epochs, 66)[i+1], 2)),
           c(ptop, rep(ptop - 0.3, 2), ptop), col = cols[i])
-  text(mean(c(epochs, 66)[i:(i+1)]), ptop - 0.15, enames[i])
+  text(mean(c(epochs, 66)[i:(i+1)]), ptop - 0.15, enames[i], cex = 0.8)
 }
 
 ## 100 kyr
@@ -153,7 +153,7 @@ dev.off()
 
 hv = read.csv("data/Hansen13Russell.csv")
 
-png("out/SI_figs/FigS10_5.png", width = 9, height = 5.2, units = "in", res = 600)
+png("out/SI_figs/FigS13.png", width = 9, height = 5.2, units = "in", res = 600)
 
 par(mai = c(0.1, 1.1, 1.1, 1.1))
 plot(-10, 0, ylab = "", xlab="Age (Ma)",  
@@ -184,7 +184,7 @@ dev.off()
 
 ## Alternative version full Cenozoic
 
-png("out/other_figs/FigS10_5_full.png", width = 9, height = 5.2, units = "in", res = 600)
+png("out/other_figs/FigS13_full.png", width = 9, height = 5.2, units = "in", res = 600)
 
 par(mai = c(0.1, 1.1, 1.1, 1.1))
 plot(-10, 0, ylab = "", xlab="Age (Ma)",  
@@ -218,11 +218,11 @@ dev.off()
 source("code/PrepForPlots.R")
 
 ## Plot the CO2 record
-png("out/SI_figs/FigSxxx.png", width = 8, height = 6, units = "in", res = 600)
+png("out/SI_figs/FigS9.png", width = 8, height = 5, units = "in", res = 600)
 
-par(mai = c(0.4, 1.1, 1.1, 1.1))
+par(mai = c(0.4, 1.1, 1.1, 0.4))
 plot(-10, 0, ylab = "", xlab="",  
-     xlim = c(67, 0), ylim = c(4, 8.3), axes = FALSE)
+     xlim = c(67, 0), ylim = c(5, 8.3), axes = FALSE)
 
 tsdens(cpm, "darkred")
 tsdens(cp, "dodgerblue4")
@@ -240,16 +240,5 @@ for(i in 1:(length(epochs))){
           c(ptop, rep(ptop - 0.3, 2), ptop), col = cols[i])
   text(mean(c(epochs, 66)[i:(i+1)]), ptop - 0.15, enames[i], cex = 0.8)
 }
-
-## Add the 95% CI
-par(new = TRUE)
-plot(0, 0, ylab = "", xlab = "", xlim = c(67, 0), ylim = c(3, 11), 
-     axes = FALSE, type = "n")
-lines(cpm$ages, log(exp(cpm$X97.5.) - exp(cpm$X2.5.)), col = "darkred")
-lines(cp$ages, log(exp(cp$X97.5.) - exp(cp$X2.5.)), col = "dodgerblue4")
-
-axis(4, c(log(20), log(100), log(250), log(750)),
-     c(20, 100, 250, 750))
-mtext(expression("CO"[2]*" 95% CI (ppm)"), 4, line = 3, at = 4.8)
 
 dev.off()

@@ -156,18 +156,15 @@ lines(cp.trunc$ages, (cp.trunc$X50. - min(cp.trunc$X50.)) / diff(range(cp.trunc$
 ### Axes
 polygon(c(65, 65, 0, 0),
         c(1, 0, 0, 1))
-axis(1, c(51, 33.9, 28, 16, 2.6), labels = FALSE, pos = 0)
-mtext(c(51, 33.9, 28, 16, 2.6), 1, at = c(51, 33.9, 28, 16, 2.6), cex = 0.7)
+axis(1, c(51, 33.9, 16, 2.6), labels = FALSE, pos = 0)
+mtext(c(51, 33.9, 16, 2.6), 1, at = c(51, 33.9, 16, 2.6), cex = 0.7)
 mtext("Millions of years before present", 1, 1, cex = 0.9)
 ticks = c((log(270) - min(cp.trunc$X50.)) / diff(range(cp.trunc$X50.)) * 0.9 + 0.05,
-          (log(460) - min(cp.trunc$X50.)) / diff(range(cp.trunc$X50.)) * 0.9 + 0.05,
           (log(480) - min(cp.trunc$X50.)) / diff(range(cp.trunc$X50.)) * 0.9 + 0.05,
           (log(720) - min(cp.trunc$X50.)) / diff(range(cp.trunc$X50.)) * 0.9 + 0.05,
           (log(1600) - min(cp.trunc$X50.)) / diff(range(cp.trunc$X50.)) * 0.9 + 0.05)
 axis(4, ticks, labels = FALSE, pos = 0)
-ticks[2] = ticks[2] - diff(range(cp.trunc$X50.)) * 0.01
-ticks[3] = ticks[3] + diff(range(cp.trunc$X50.)) * 0.01
-mtext(c(270, 460, 480, 720, 1600), 4, -0.4, at = ticks, cex = 0.7, las = 2)
+mtext(c(270, 480, 720, 1600), 4, -0.4, at = ticks, cex = 0.7)
 mtext(expression("Atmospheric CO"[2]*" (ppm)"), 4, 1, cex = 0.9)
 ### Legend
 legx.min = 61
