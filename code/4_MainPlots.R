@@ -193,6 +193,7 @@ for(i in 1:4){
   text(x = tticks[i], y = legy.min - 0.055, round(tvals[i], 1), col = "white", 
        cex = 0.7)
 }
-text(mean(tticks), legy.min - 0.11, "Temperature (\u00B0C)", cex = 0.7, 
+text(mean(tticks), legy.min - 0.11, 
+     expression(Delta*" GMST (K relative to preindustrial)"), cex = 0.7, 
      col = "white")
 dev.off()
