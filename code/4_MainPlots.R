@@ -149,20 +149,29 @@ for(i in 7:nrow(tp)){
           c(0, 1, 1, 0), col = wscols[tcol[i]], border = NA)
 }
 ### CO2
-lines(cp.trunc$ages, (cp.trunc$X50. - min(cp.trunc$X50.)) / diff(range(cp.trunc$X50.))
+polygon(c(cp.trunc$ages, rev(cp.trunc$ages)), 
+        c((cp.trunc$X2.5.- min(cp.trunc[, -1])) / diff(range(cp.trunc[, -1])), 
+          rev((cp.trunc$X97.5.- min(cp.trunc[, -1])) / diff(range(cp.trunc[, -1]))))
+        * 0.9 + 0.05,
+        col = rgb(0.9, 0.9, 0.9, 0.5), border = NA)
+lines(cp.trunc$ages, (cp.trunc$X2.5. - min(cp.trunc[, -1])) / diff(range(cp.trunc[, -1]))
+      * 0.9 + 0.05, col = rgb(0, 0, 0, 0.4))
+lines(cp.trunc$ages, (cp.trunc$X97.5. - min(cp.trunc[, -1])) / diff(range(cp.trunc[, -1]))
+      * 0.9 + 0.05, col = rgb(0, 0, 0, 0.4))
+lines(cp.trunc$ages, (cp.trunc$X50. - min(cp.trunc[, -1])) / diff(range(cp.trunc[, -1]))
       * 0.9 + 0.05, lw = 3, col = "white")
-lines(cp.trunc$ages, (cp.trunc$X50. - min(cp.trunc$X50.)) / diff(range(cp.trunc$X50.))
+lines(cp.trunc$ages, (cp.trunc$X50. - min(cp.trunc[, -1])) / diff(range(cp.trunc[, -1]))
       * 0.9 + 0.05, lw = 2)
-### Axes
+c### Axes
 polygon(c(65, 65, 0, 0),
         c(1, 0, 0, 1))
 axis(1, c(51, 33.9, 16, 2.6), labels = FALSE, pos = 0)
 mtext(c(51, 33.9, 16, 2.6), 1, at = c(51, 33.9, 16, 2.6), cex = 0.7)
 mtext("Millions of years before present", 1, 1, cex = 0.9)
-ticks = c((log(270) - min(cp.trunc$X50.)) / diff(range(cp.trunc$X50.)) * 0.9 + 0.05,
-          (log(480) - min(cp.trunc$X50.)) / diff(range(cp.trunc$X50.)) * 0.9 + 0.05,
-          (log(720) - min(cp.trunc$X50.)) / diff(range(cp.trunc$X50.)) * 0.9 + 0.05,
-          (log(1600) - min(cp.trunc$X50.)) / diff(range(cp.trunc$X50.)) * 0.9 + 0.05)
+ticks = c((log(270) - min(cp.trunc[, -1])) / diff(range(cp.trunc[, -1])) * 0.9 + 0.05,
+          (log(480) - min(cp.trunc[, -1])) / diff(range(cp.trunc[, -1])) * 0.9 + 0.05,
+          (log(720) - min(cp.trunc[, -1])) / diff(range(cp.trunc[, -1])) * 0.9 + 0.05,
+          (log(1600) - min(cp.trunc[, -1])) / diff(range(cp.trunc[, -1])) * 0.9 + 0.05)
 axis(4, ticks, labels = FALSE, pos = 0)
 mtext(c(270, 480, 720, 1600), 4, -0.4, at = ticks, cex = 0.7)
 mtext(expression("Atmospheric CO"[2]*" (ppm)"), 4, 1, cex = 0.9)
@@ -174,7 +183,7 @@ legy.max = legy.min + 0.07
 n = length(wscols)
 xint = (legx.max - legx.min) / n
 polygon(c(legx.min, legx.min, legx.max, legx.max),
-        c(legy.min, legy.max, legy.max, legy.min), lwd = 4, 
+        c(legy.min, legy.max, legy.max, legy.min), lwd = 3, 
         border = "white", lend = 2, ljoin = 1)
 for(i in seq(n)){
   polygon(c(rep(legx.min + xint * (i - 1), 2), rep(legx.min + xint * i, 2)),
@@ -186,7 +195,7 @@ tvals = min(log(tp$X50.+10)) + diff(range(log(tp$X50.+10))) * seq(0, 1, length =
 tvals = exp(tvals) - 10
 for(i in 1:4){
   lines(rep(tticks[i], 2), c(legy.min, legy.min - 0.025), col = "white", 
-        lw = 2, lend = 1)
+        lw = 1.5, lend = 1)
   text(x = tticks[i], y = legy.min - 0.055, round(tvals[i], 1), col = "white", 
        cex = 0.7)
 }
