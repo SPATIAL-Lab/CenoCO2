@@ -162,7 +162,7 @@ lines(cp.trunc$ages, (cp.trunc$X50. - min(cp.trunc[, -1])) / diff(range(cp.trunc
       * 0.9 + 0.05, lw = 3, col = "white")
 lines(cp.trunc$ages, (cp.trunc$X50. - min(cp.trunc[, -1])) / diff(range(cp.trunc[, -1]))
       * 0.9 + 0.05, lw = 2)
-c### Axes
+### Axes
 polygon(c(65, 65, 0, 0),
         c(1, 0, 0, 1))
 axis(1, c(51, 33.9, 16, 2.6), labels = FALSE, pos = 0)
