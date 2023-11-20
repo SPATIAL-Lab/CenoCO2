@@ -139,8 +139,8 @@ tcol = floor((log(tp$X50.+10) - min(log(tp$X50.+10))) / diff(range(log(tp$X50.+1
                (length(wscols) - 1e-6) + 1)
 
 ## Print figure
-png("out/main_figs/PrintFig.png", width = 6, height = 2.9, units = "in", res = 600)
-par(mai = c(0.5, 0, 0, 0.6))
+pdf("out/main_figs/PrintFig.pdf", width = 6, height = 2.9)
+par(mai = c(0.5, 0.6, 0, 0))
 plot(0, 0, type = "n", xlim = c(65, 0), ylim = c(0, 1), axes = FALSE,
      xlab = "", ylab = "")
 ### Warming stripes
@@ -172,9 +172,9 @@ ticks = c((log(270) - min(cp.trunc[, -1])) / diff(range(cp.trunc[, -1])) * 0.9 +
           (log(480) - min(cp.trunc[, -1])) / diff(range(cp.trunc[, -1])) * 0.9 + 0.05,
           (log(720) - min(cp.trunc[, -1])) / diff(range(cp.trunc[, -1])) * 0.9 + 0.05,
           (log(1600) - min(cp.trunc[, -1])) / diff(range(cp.trunc[, -1])) * 0.9 + 0.05)
-axis(4, ticks, labels = FALSE, pos = 0)
-mtext(c(270, 480, 720, 1600), 4, -0.4, at = ticks, cex = 0.7)
-mtext(expression("Atmospheric CO"[2]*" (ppm)"), 4, 1, cex = 0.9)
+axis(2, ticks, labels = FALSE, pos = 65)
+mtext(c(270, 480, 720, 1600), 2, -0.4, at = ticks, cex = 0.7)
+mtext(expression("Atmospheric CO"[2]*" (ppm)"), 2, 1, cex = 0.9)
 ### Legend
 legx.min = 61
 legx.max = legx.min - 20

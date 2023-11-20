@@ -126,7 +126,7 @@ tcol = floor((log(tp$X50.+10) - min(log(tp$X50.+10))) / diff(range(log(tp$X50.+1
                (length(wscols) - 1e-6) + 1)
 
 ## Figure
-png("out/other_figs/warmingStripes.png", width = 6, height = 2.9, units = "in", res = 600)
+png("out/other_figs/UU_press.png", width = 6, height = 2.9, units = "in", res = 600)
 par(mai = c(0.5, 0, 0, 0.6))
 plot(0, 0, type = "n", xlim = c(65, 0), ylim = c(0, 1), axes = FALSE,
      xlab = "", ylab = "")
@@ -191,4 +191,54 @@ for(i in 1:4){
 text(mean(tticks), legy.min - 0.11, 
      expression(Delta*" GMST (K relative to preindustrial)"), cex = 0.7, 
      col = "white")
+dev.off()
+
+# Lamont press plot ----
+
+## Colors
+wscols = c("#08306b", "#08519c", "#2171b5", "#4292c6", "#6baed6",
+           "#9ecae1", "#c6dbef", "#deebf7", "#fee0d2", "#fcbba1",
+           "#fc9272", "#fb6a4a", "#ef3b2c", "#cb181d", "#a50f15",
+           "#67000d")
+cp.trunc = cp[7:nrow(cp),]
+
+tcol = floor((log(tp$X50.+10) - min(log(tp$X50.+10))) / diff(range(log(tp$X50.+10))) * 
+               (length(wscols) - 1e-6) + 1)
+
+## Print figure
+png("out/other_figs/Lamont_press.png", width = 6, height = 2.9, units = "in", res = 600)
+par(mai = c(0.5, 0, 0, 0.6))
+plot(0, 0, type = "n", xlim = c(65, 0), ylim = c(0, 1), axes = FALSE,
+     xlab = "", ylab = "")
+### Warming stripes
+for(i in 7:nrow(tp)){
+  polygon(c(rep(tp$ages[i] - 0.25, 2), rep(tp$ages[i] + 0.25, 2)),
+          c(0, 1, 1, 0), col = wscols[tcol[i]], border = NA)
+}
+### CO2
+polygon(c(cp.trunc$ages, rev(cp.trunc$ages)), 
+        c((cp.trunc$X2.5.- min(cp.trunc[, -1])) / diff(range(cp.trunc[, -1])), 
+          rev((cp.trunc$X97.5.- min(cp.trunc[, -1])) / diff(range(cp.trunc[, -1]))))
+        * 0.9 + 0.05,
+        col = rgb(0.9, 0.9, 0.9, 0.5), border = NA)
+lines(cp.trunc$ages, (cp.trunc$X2.5. - min(cp.trunc[, -1])) / diff(range(cp.trunc[, -1]))
+      * 0.9 + 0.05, col = rgb(0, 0, 0, 0.4))
+lines(cp.trunc$ages, (cp.trunc$X97.5. - min(cp.trunc[, -1])) / diff(range(cp.trunc[, -1]))
+      * 0.9 + 0.05, col = rgb(0, 0, 0, 0.4))
+lines(cp.trunc$ages, (cp.trunc$X50. - min(cp.trunc[, -1])) / diff(range(cp.trunc[, -1]))
+      * 0.9 + 0.05, lw = 3, col = "white")
+lines(cp.trunc$ages, (cp.trunc$X50. - min(cp.trunc[, -1])) / diff(range(cp.trunc[, -1]))
+      * 0.9 + 0.05, lw = 2)
+### Axes
+polygon(c(65, 65, 0, 0),
+        c(1, 0, 0, 1))
+axis(1, c(51, 33.9, 16, 2.6), labels = FALSE, pos = 0)
+mtext(c(51, 33.9, 16, 2.6), 1, at = c(51, 33.9, 16, 2.6), cex = 0.7)
+ticks = c((log(270) - min(cp.trunc[, -1])) / diff(range(cp.trunc[, -1])) * 0.9 + 0.05,
+          (log(480) - min(cp.trunc[, -1])) / diff(range(cp.trunc[, -1])) * 0.9 + 0.05,
+          (log(720) - min(cp.trunc[, -1])) / diff(range(cp.trunc[, -1])) * 0.9 + 0.05,
+          (log(1600) - min(cp.trunc[, -1])) / diff(range(cp.trunc[, -1])) * 0.9 + 0.05)
+axis(4, ticks, labels = FALSE, pos = 0)
+mtext(c(270, 480, 720, 1600), 4, -0.4, at = ticks, cex = 0.7)
+
 dev.off()

@@ -107,7 +107,7 @@ dev.off()
 source("code/PrepForPlots.R")
 
 ## 1 Myr
-png("out/SI_figs/FigS10.png", width = 9, height = 6, units = "in", res = 600)
+png("out/SI_figs/FigS9.png", width = 9, height = 6, units = "in", res = 600)
 
 par(mai = c(0.1, 1.1, 1.1, 1.1))
 plot(-10, 0, ylab = "", xlab="Age (Ma)",  
@@ -218,7 +218,7 @@ dev.off()
 source("code/PrepForPlots.R")
 
 ## Plot the CO2 record
-png("out/SI_figs/FigS9.png", width = 8, height = 5, units = "in", res = 600)
+png("out/SI_figs/FigS10.png", width = 8, height = 5, units = "in", res = 600)
 
 par(mai = c(0.4, 1.1, 1.1, 0.4))
 plot(-10, 0, ylab = "", xlab="",  
@@ -242,3 +242,4 @@ for(i in 1:(length(epochs))){
 }
 
 dev.off()
+
