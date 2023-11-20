@@ -5,7 +5,7 @@ Code and data for Baysian timeseries models of Cenozoic pCO<sub>2</sub> and temp
 Data used in analyses.
 - 230902_proxies.xlsx: Multiproxy paleo-CO<sub>2</sub> data
 - Hansen13Russell.csv: CO<sub>2</sub> reconstruction from Hansen, et al. (2013)
-- Westerhold.xlsx: CENOGRID benthic $\delta<sup>18</sup>O data and paleotemperatures from Westerhold, et al. (2020)
+- Westerhold.xlsx: CENOGRID benthic &delta<sup>18</sup>O data and paleotemperatures from Westerhold, et al. (2020)
 
 ## code/
 Scripts used for data analysis and plotting. Some output is saved to folder bigout/ which is not included in archive; this output can be recreated by running the scripts.
