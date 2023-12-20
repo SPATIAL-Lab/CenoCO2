@@ -13,7 +13,7 @@ ages = agevec(70, ages.bin)
 ages.len = length(ages)
 
 ## Prep data
-d = prepit("230902_proxies.xlsx")
+d = prepit("231218_proxies.xlsx")
 
 ## Parse localities
 locs = unique(d$pco2.loc)
@@ -37,8 +37,8 @@ dat = list(pco2.age = d$pco2.age, lc = lc, lp = lp,
 parameters = c("pco2_m", "pco2_m.pre", "pco2_m.eps.ac", "pco2.off", "pco2.ai")
 
 ## Run it
-n.iter = 5e5
-n.burnin = 5e4
+n.iter = 1e6
+n.burnin = 1e5
 n.thin = trunc((n.iter - n.burnin) / 2500)
 pt = proc.time()
 p = do.call(jags.parallel, list(model.file = "code/models/model.R", parameters.to.save = parameters, 
