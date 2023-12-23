@@ -56,7 +56,7 @@ ages = agevec(70, ages.bin)
 ages.len = length(ages)
 
 ## Prep data
-d = prepit()
+d = prepit("231218_proxies.xlsx")
 
 ## Parse localities
 locs = unique(d$pco2.loc)
@@ -99,7 +99,7 @@ ages = agevec(70, ages.bin)
 ages.len = length(ages)
 
 ## Prep data
-d = prepit()
+d = prepit("231218_proxies.xlsx")
 
 ## Parse localities
 locs = unique(d$pco2.loc)
@@ -142,7 +142,7 @@ ages = agevec(70, ages.bin)
 ages.len = length(ages)
 
 ## Prep data
-d = prepit("230902_proxies.xlsx")
+d = prepit("231218_proxies.xlsx")
 d = d[d$pco2.prox %in% c("boron isotopes", "phytoplankton"),]
 
 ## Parse localities
