@@ -3,7 +3,7 @@ library(openxlsx)
 source("code/Helpers.R")
 
 # Prep proxy dataset
-dat = prepit("230902_proxies.xlsx")
+dat = prepit("231218_proxies.xlsx")
 
 # Read curves
 cp = read.csv("out/500kyrCO2.csv")
